@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Minik Hedef Oyunu</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: radial-gradient(circle at 50% 0%, #1e293b, #0f172a);
+    color: #e2e8f0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    user-select: none;
+    overflow: hidden;
+  }
+  h1 {
+    font-size: 1.6rem;
+    margin-bottom: 12px;
+    letter-spacing: 1px;
+    background: linear-gradient(90deg, #38bdf8, #a78bfa);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .hud {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 12px;
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+  .hud span { color: #38bdf8; }
+  .hud .miss span { color: #f87171; }
+  #arena {
+    position: relative;
+    width: min(92vw, 520px);
+    height: min(64vh, 520px);
+    background: rgba(15, 23, 42, 0.6);
+    border: 2px solid #334155;
+    border-radius: 16px;
+    overflow: hidden;
+    cursor: crosshair;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+  .target {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #fca5a5, #ef4444 55%, #b91c1c);
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.6), inset 0 0 8px rgba(0,0,0,0.3);
+    cursor: pointer;
+    transform: scale(0);
+    animation: pop 0.15s ease-out forwards;
+  }
+  .target.gold {
+    background: radial-gradient(circle at 35% 30%, #fde68a, #f59e0b 55%, #b45309);
+    box-shadow: 0 0 24px rgba(245, 158, 11, 0.8), inset 0 0 8px rgba(0,0,0,0.3);
+  }
+  @keyframes pop { to { transform: scale(1); } }
+  .overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    background: rgba(15, 23, 42, 0.88);
+    backdrop-filter: blur(4px);
+    text-align: center;
+    padding: 20px;
+    z-index: 10;
+  }
+  .overlay h2 { font-size: 1.5rem; }
+  .overlay p { color: #94a3b8; max-width: 320px; line-height: 1.5; }
+  button {
+    padding: 12px 28px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #0f172a;
+    background: linear-gradient(90deg, #38bdf8, #a78bfa);
+    border: none;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.2s;
+    box-shadow: 0 6px 20px rgba(56, 189, 248, 0.35);
+  }
+  button:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(56, 189, 248, 0.5); }
+  button:active { transform: translateY(0); }
+  .hidden { display: none !important; }
+  .float {
+    position: absolute;
+    font-weight: 800;
+    font-size: 1.1rem;
+    pointer-events: none;
+    animation: rise 0.7s ease-out forwards;
+    z-index: 5;
+  }
+  @keyframes rise {
+    to { transform: translateY(-40px); opacity: 0; }
+  }
+  .hint { margin-top: 12px; color: #64748b; font-size: 0.85rem; }
+</style>
+</head>
+<body>
+  <h1>🎯 Minik Hedef Oyunu</h1>
+  <div class="hud">
+    <div>Skor: <span id="score">0</span></div>
+    <div>Süre: <span id="time">30</span>s</div>
+    <div class="miss">Kaçan: <span id="miss">0</span></div>
+    <div>Rekor: <span id="best">0</span></div>
+  </div>
+
+  <div id="arena">
+    <div class="overlay" id="startScreen">
+      <h2>Hazır mısın?</h2>
+      <p>Beliren hedeflere hızlıca tıkla! Kırmızı = 1 puan, altın hedef = 3 puan. Kaçırma!</p>
+      <button id="startBtn">Başla ▶</button>
+    </div>
+    <div class="overlay hidden" id="endScreen">
+      <h2 id="endTitle">Süre doldu!</h2>
+      <p id="endText"></p>
+      <button id="restartBtn">Tekrar Oyna ↺</button>
+    </div>
+  </div>
+  <div class="hint">İpucu: Hedefler küçüldükçe puanlar değerlenir 😉</div>
+
+<script>
+(function () {
+  const arena = document.getElementById('arena');
+  const scoreEl = document.getElementById('score');
+  const timeEl = document.getElementById('time');
+  const missEl = document.getElementById('miss');
+  const bestEl = document.getElementById('best');
+  const startScreen = document.getElementById('startScreen');
+  const endScreen = document.getElementById('endScreen');
+  const endTitle = document.getElementById('endTitle');
+  const endText = document.getElementById('endText');
+  const startBtn = document.getElementById('startBtn');
+  const restartBtn = document.getElementById('restartBtn');
+
+  const GAME_TIME = 30;
+  let score = 0, miss = 0, timeLeft = GAME_TIME;
+  let running = false;
+  let spawnTimer = null, countdownTimer = null, currentTarget = null, targetLifeTimer = null;
+
+  let best = Number(localStorage.getItem('hedefRekor') || 0);
+  bestEl.textContent = best;
+
+  function rand(min, max) { return Math.random() * (max - min) + min; }
+
+  function floatText(x, y, text, color) {
+    const f = document.createElement('div');
+    f.className = 'float';
+    f.textContent = text;
+    f.style.color = color;
+    f.style.left = x + 'px';
+    f.style.top = y + 'px';
+    arena.appendChild(f);
+    setTimeout(() => f.remove(), 700);
+  }
+
+  function clearTarget() {
+    if (currentTarget) { currentTarget.remove(); currentTarget = null; }
+    if (targetLifeTimer) { clearTimeout(targetLifeTimer); targetLifeTimer = null; }
+  }
+
+  function spawnTarget() {
+    if (!running) return;
+    clearTarget();
+
+    const isGold = Math.random() < 0.2;
+    const size = rand(30, 64);
+    const pad = 6;
+    const maxX = arena.clientWidth - size - pad;
+    const maxY = arena.clientHeight - size - pad;
+
+    const t = document.createElement('div');
+    t.className = 'target' + (isGold ? ' gold' : '');
+    t.style.width = size + 'px';
+    t.style.height = size + 'px';
+    t.style.left = rand(pad, maxX) + 'px';
+    t.style.top = rand(pad, maxY) + 'px';
+
+    // Küçük hedef = daha çok puan
+    const sizeBonus = Math.round((64 - size) / 20); // 0..1-2
+    const points = (isGold ? 3 : 1) + sizeBonus;
+
+    t.addEventListener('pointerdown', function (e) {
+      e.stopPropagation();
+      if (!running) return;
+      score += points;
+      scoreEl.textContent = score;
+      const r = arena.getBoundingClientRect();
+      floatText(e.clientX - r.left, e.clientY - r.top, '+' + points, isGold ? '#fbbf24' : '#4ade80');
+      clearTarget();
+      nextSpawn(rand(180, 420));
+    });
+
+    currentTarget = t;
+    arena.appendChild(t);
+
+    // Hedef kaçırılırsa
+    const life = rand(800, 1400);
+    targetLifeTimer = setTimeout(() => {
+      if (!running) return;
+      miss++;
+      missEl.textContent = miss;
+      clearTarget();
+      nextSpawn(rand(150, 350));
+    }, life);
+  }
+
+  function nextSpawn(delay) {
+    if (spawnTimer) clearTimeout(spawnTimer);
+    spawnTimer = setTimeout(spawnTarget, delay);
+  }
+
+  // Boş alana tıklarsan ıskalarsın
+  arena.addEventListener('pointerdown', function (e) {
+    if (!running) return;
+    const r = arena.getBoundingClientRect();
+    floatText(e.clientX - r.left, e.clientY - r.top, 'Iska!', '#f87171');
+  });
+
+  function tick() {
+    timeLeft--;
+    timeEl.textContent = timeLeft;
+    if (timeLeft <= 0) endGame();
+  }
+
+  function startGame() {
+    score = 0; miss = 0; timeLeft = GAME_TIME; running = true;
+    scoreEl.textContent = '0';
+    missEl.textContent = '0';
+    timeEl.textContent = GAME_TIME;
+    startScreen.classList.add('hidden');
+    endScreen.classList.add('hidden');
+    countdownTimer = setInterval(tick, 1000);
+    nextSpawn(400);
+  }
+
+  function endGame() {
+    running = false;
+    clearInterval(countdownTimer);
+    if (spawnTimer) clearTimeout(spawnTimer);
+    clearTarget();
+
+    let newRecord = false;
+    if (score > best) {
+      best = score;
+      localStorage.setItem('hedefRekor', String(best));
+      bestEl.textContent = best;
+      newRecord = true;
+    }
+
+    endTitle.textContent = newRecord ? '🏆 Yeni Rekor!' : 'Süre doldu!';
+    endText.textContent = `Skor: ${score} · Kaçan hedef: ${miss}` +
+      (newRecord ? ' — Harikasın!' : ` · Rekor: ${best}`);
+    endScreen.classList.remove('hidden');
+  }
+
+  startBtn.addEventListener('click', startGame);
+  restartBtn.addEventListener('click', startGame);
+})();
+</script>
+</body>
+</html>
