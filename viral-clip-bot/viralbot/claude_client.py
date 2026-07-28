@@ -119,3 +119,49 @@ def find_viral_moments(
 
     cleaned.sort(key=lambda m: m.get("score", 0), reverse=True)
     return cleaned[:max_moments]
+
+
+META_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "title": {"type": "string", "description": "Tıklatıcı, <=70 karakter Türkçe başlık"},
+        "description": {
+            "type": "string",
+            "description": "2-3 cümlelik Türkçe açıklama (Shorts açıklaması için)",
+        },
+        "hashtags": {
+            "type": "array",
+            "items": {"type": "string"},
+            "description": "5-8 adet ilgili hashtag (# ile)",
+        },
+    },
+    "required": ["title", "description", "hashtags"],
+    "additionalProperties": False,
+}
+
+
+def generate_metadata(clip_transcript: str, moment_title: str) -> dict:
+    """Bir klibin metni için SEO başlık/açıklama/hashtag üretir."""
+    client = _client()
+    resp = client.messages.create(
+        model=MODEL,
+        max_tokens=800,
+        system=(
+            "Sen bir sosyal medya editörüsün. Verilen kısa klip metnine göre "
+            "YouTube Shorts / TikTok için Türkçe başlık, açıklama ve hashtag üret. "
+            "Başlık merak uyandırsın, clickbait'e kaçmadan çarpıcı olsun."
+        ),
+        messages=[
+            {
+                "role": "user",
+                "content": (
+                    f"Klip ana teması: {moment_title}\n\n"
+                    f"Klip metni:\n{clip_transcript}\n\n"
+                    "Bu klip için başlık, açıklama ve hashtag üret."
+                ),
+            }
+        ],
+        output_config={"format": {"type": "json_schema", "schema": META_SCHEMA}},
+    )
+    text = next((b.text for b in resp.content if b.type == "text"), "{}")
+    return json.loads(text)
