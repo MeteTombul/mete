@@ -85,6 +85,24 @@ def main(argv: list[str] | None = None) -> int:
         help="Sadece hesap yetkilendirmesi yap ve çık (ör. youtube). Klip üretmez.",
     )
 
+    # Otomatik/zamanlanmış üretim
+    p.add_argument(
+        "--watch", action="store_true",
+        help="Kanalı sürekli izle; yeni videolar geldikçe otomatik klip üret/yükle",
+    )
+    p.add_argument(
+        "--once", action="store_true",
+        help="Tek kontrol turu: yalnızca yeni (işlenmemiş) videoları işle ve çık",
+    )
+    p.add_argument(
+        "--interval", type=int, default=3600,
+        help="İzleme modunda kontrol aralığı, saniye (vars. 3600)",
+    )
+    p.add_argument(
+        "--check-count", type=int, default=5,
+        help="Her turda kaç en yeni video kontrol edilsin (vars. 5)",
+    )
+
     args = p.parse_args(argv)
 
     # Yalnızca yetkilendirme modu
@@ -123,22 +141,39 @@ def main(argv: list[str] | None = None) -> int:
         font=args.font,
     )
 
+    common = dict(
+        opts=opts,
+        moments_per_video=args.moments,
+        whisper_model=args.whisper_model,
+        whisper_device=args.whisper_device,
+        clip_min=args.clip_min,
+        clip_max=args.clip_max,
+        use_scenes=not args.no_scenes,
+        workers=args.workers,
+        upload_targets=[s for s in args.upload.split(",") if s.strip()],
+        secrets_dir=args.secrets_dir,
+    )
+
     try:
-        run(
-            channel_url=args.channel_url,
-            out_dir=Path(args.out),
-            opts=opts,
-            top_videos=args.videos,
-            moments_per_video=args.moments,
-            whisper_model=args.whisper_model,
-            whisper_device=args.whisper_device,
-            clip_min=args.clip_min,
-            clip_max=args.clip_max,
-            use_scenes=not args.no_scenes,
-            workers=args.workers,
-            upload_targets=[s for s in args.upload.split(",") if s.strip()],
-            secrets_dir=args.secrets_dir,
-        )
+        if args.watch or args.once:
+            from . import scheduler
+            if args.once:
+                scheduler.tick(
+                    args.channel_url, Path(args.out),
+                    check_count=args.check_count, **common,
+                )
+            else:
+                scheduler.watch(
+                    args.channel_url, Path(args.out),
+                    interval=args.interval, check_count=args.check_count, **common,
+                )
+        else:
+            run(
+                channel_url=args.channel_url,
+                out_dir=Path(args.out),
+                top_videos=args.videos,
+                **common,
+            )
     except KeyboardInterrupt:
         print("\nİptal edildi.", file=sys.stderr)
         return 130

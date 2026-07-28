@@ -194,9 +194,14 @@ def run(
     workers: int = 1,
     upload_targets: list[str] | None = None,
     secrets_dir: Path | None = None,
+    videos: list | None = None,
     log=print,
 ) -> list[dict]:
-    """Tüm akışı çalıştırır ve üretilen kliplerin meta verilerini döndürür."""
+    """Tüm akışı çalıştırır ve üretilen kliplerin meta verilerini döndürür.
+
+    `videos` verilirse kanal taranmaz; verilen video listesi işlenir (zamanlayıcı
+    yeni videoları buradan geçirir).
+    """
     out_dir = Path(out_dir)
     work = out_dir / "_work"
     clips_dir = out_dir / "klipler"
@@ -209,8 +214,9 @@ def run(
         with _print_lock:
             log(msg)
 
-    safe_log(f"[1/5] Kanal taranıyor: {channel_url}")
-    videos = channel_mod.list_top_videos(channel_url, limit=top_videos)
+    if videos is None:
+        safe_log(f"[1/5] Kanal taranıyor: {channel_url}")
+        videos = channel_mod.list_top_videos(channel_url, limit=top_videos)
     if not videos:
         safe_log("Hiç video bulunamadı. URL'yi kontrol edin.")
         return []
@@ -242,8 +248,14 @@ def run(
                     safe_log(f"! Video işlenemedi: {e}")
 
     summary_path = out_dir / "ozet.json"
+    existing: list = []
+    if summary_path.exists():
+        try:
+            existing = json.loads(summary_path.read_text(encoding="utf-8"))
+        except Exception:  # noqa: BLE001
+            existing = []
     summary_path.write_text(
-        json.dumps(results, ensure_ascii=False, indent=2), encoding="utf-8"
+        json.dumps(existing + results, ensure_ascii=False, indent=2), encoding="utf-8"
     )
     safe_log(f"\nBitti. {len(results)} klip üretildi → {clips_dir}")
     safe_log(f"Özet: {summary_path}")

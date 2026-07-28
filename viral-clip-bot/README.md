@@ -89,6 +89,23 @@ python -m viralbot "https://www.youtube.com/@KANAL" \
   --secrets-dir secrets
 ```
 
+## 🤖 Otomatik / zamanlanmış üretim
+
+Kanalı sürekli izleyip **yeni yüklenen** videolar geldikçe otomatik klip üretir (ve istenirse yükler):
+
+```bash
+# Sürekli izle: her saat başı yeni videoları kontrol et, otomatik üret + YouTube'a yükle
+python -m viralbot "https://youtube.com/@KANAL" \
+  --watch --interval 3600 --upload youtube
+
+# Tek kontrol turu (cron/görev zamanlayıcı ile birlikte kullanışlı):
+python -m viralbot "https://youtube.com/@KANAL" --once --upload youtube
+```
+
+- İlk `--watch` turunda mevcut videolar "işlenmiş" işaretlenir; yalnızca **bundan sonra** gelen yeni yüklemeler işlenir (geçmişi baştan üretmez).
+- İşlenen video kimlikleri `cikti/_islenen.json`'da tutulur → aynı video iki kez işlenmez.
+- Sunucuda `--once`'ı cron'a bağlayarak da tam otomatik bir hat kurabilirsin (ör. `0 * * * *`).
+
 ## 🌐 Web arayüzü
 
 Terminal yerine tarayıcıdan kullanmak için:
@@ -154,5 +171,6 @@ Tokenlar `--secrets-dir` (vars. `cikti/secrets`) klasöründen okunur.
 | `config.py` | Render seçenekleri (biçim, tema, efekt anahtarları) |
 | `pipeline.py` | Uçtan uca akış (paralel işleme, yükleme) |
 | `uploaders/` | YouTube / TikTok / Instagram resmî API yükleyicileri |
+| `scheduler.py` | Otomatik izleme: yeni videoları bulup işleyen zamanlayıcı |
 | `webapp.py` | Flask web arayüzü |
 | `cli.py` | Komut satırı arayüzü |
