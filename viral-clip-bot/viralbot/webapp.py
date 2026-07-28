@@ -9,6 +9,14 @@ from __future__ import annotations
 import threading
 from pathlib import Path
 
+from dotenv import load_dotenv
+
+# .env dosyasındaki ANTHROPIC_API_KEY vb. değişkenleri yükle (masaüstü uygulaması yolu dâhil).
+# Önce proje kökündeki .env, bulunamazsa çalışma dizininden yukarı doğru aranır.
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent
+load_dotenv(_PROJECT_ROOT / ".env")
+load_dotenv()
+
 from flask import (
     Flask,
     jsonify,
