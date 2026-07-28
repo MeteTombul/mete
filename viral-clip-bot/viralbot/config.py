@@ -18,6 +18,10 @@ class RenderOptions:
     highlight_color: str = "&H0000E5FF"  # ASS BGR: turuncu/altın vurgu
     font: str = "Arial"
 
+    # Kırpma / kadraj
+    reframe: bool = False         # yüz tespitiyle özneye ortalanmış kırpma
+                                  # (kapalıysa: bulanık arka plan + ortalanmış video)
+
     # Efektler
     progress_bar: bool = True     # altta ilerleme çubuğu
     loudnorm: bool = True         # ses seviyesi normalizasyonu

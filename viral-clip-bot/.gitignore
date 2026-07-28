@@ -3,6 +3,11 @@ __pycache__/
 *.pyc
 .env
 cikti/
+secrets/
+*_token.json
+*_token.txt
+*client_secret*.json
+instagram.json
 *.mp4
 *.wav
 *.ass

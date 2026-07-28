@@ -55,6 +55,8 @@ def main(argv: list[str] | None = None) -> int:
     # Biçim ve efekt seçenekleri
     p.add_argument("--aspect", default="9:16", choices=["9:16", "1:1", "16:9"],
                    help="Çıktı formatı (vars. 9:16)")
+    p.add_argument("--reframe", action="store_true",
+                   help="Yüz tespitiyle özneye ortalanmış akıllı kırpma (bulanık arka plan yerine)")
     p.add_argument("--no-karaoke", action="store_true", help="Kelime kelime karaoke altyazıyı kapat")
     p.add_argument("--no-scenes", action="store_true", help="Sahne kesimi hizalamayı kapat")
     p.add_argument("--no-progress-bar", action="store_true", help="İlerleme çubuğunu kapat")
@@ -69,7 +71,33 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--highlight-color", default="&H0000E5FF", help="Vurgu rengi (ASS BGR, vars. turuncu)")
     p.add_argument("--font", default="Arial", help="Altyazı fontu (vars. Arial)")
 
+    # Otomatik yükleme
+    p.add_argument(
+        "--upload", default="",
+        help="Virgülle platformlar: youtube,tiktok,instagram (boş = yükleme yok)",
+    )
+    p.add_argument(
+        "--secrets-dir", type=Path, default=None,
+        help="OAuth token/kimlik dosyaları klasörü (vars. <çıktı>/secrets)",
+    )
+    p.add_argument(
+        "--authorize", default="",
+        help="Sadece hesap yetkilendirmesi yap ve çık (ör. youtube). Klip üretmez.",
+    )
+
     args = p.parse_args(argv)
+
+    # Yalnızca yetkilendirme modu
+    if args.authorize:
+        from .uploaders import get_uploader
+        secrets = args.secrets_dir or (Path(args.out) / "secrets")
+        try:
+            up = get_uploader(args.authorize, secrets)
+            print(up.authorize())
+            return 0
+        except Exception as e:  # noqa: BLE001
+            print(f"Yetkilendirme hatası: {e}", file=sys.stderr)
+            return 1
 
     problems = _check_dependencies()
     if problems:
@@ -80,6 +108,7 @@ def main(argv: list[str] | None = None) -> int:
 
     opts = RenderOptions(
         aspect=args.aspect,
+        reframe=args.reframe,
         karaoke=not args.no_karaoke,
         progress_bar=not args.no_progress_bar,
         loudnorm=not args.no_loudnorm,
@@ -107,6 +136,8 @@ def main(argv: list[str] | None = None) -> int:
             clip_max=args.clip_max,
             use_scenes=not args.no_scenes,
             workers=args.workers,
+            upload_targets=[s for s in args.upload.split(",") if s.strip()],
+            secrets_dir=args.secrets_dir,
         )
     except KeyboardInterrupt:
         print("\nİptal edildi.", file=sys.stderr)

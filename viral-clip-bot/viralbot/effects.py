@@ -38,11 +38,14 @@ def render_clip(
     end: float,
     out_path: Path,
     opts: RenderOptions,
+    focus_x: float | None = None,
 ) -> Path:
     """Kaynaktan [start, end] aralığını seçilen formatta viral klip olarak üretir.
 
-    Efektler: bulanık arka plan + ortalanmış video, gömülü altyazı, baş/son fade,
-    (opsiyonel) ilerleme çubuğu, logo, arka plan müziği ve ses normalizasyonu.
+    Kadraj: opts.reframe açık ve focus_x verilmişse özneye ortalanmış kırpma,
+    aksi halde bulanık arka plan + ortalanmış video.
+    Efektler: gömülü altyazı, baş/son fade, (opsiyonel) ilerleme çubuğu, logo,
+    arka plan müziği ve ses normalizasyonu.
     """
     out_path.parent.mkdir(parents=True, exist_ok=True)
     dur = max(0.1, end - start)
@@ -66,14 +69,24 @@ def render_clip(
         next_idx += 1
 
     # --- Video filtre zinciri ---
-    v = (
-        "[0:v]split=2[bg][fg];"
-        f"[bg]scale={W}:{H}:force_original_aspect_ratio=increase,"
-        f"crop={W}:{H},boxblur=luma_radius=40:luma_power=1[bgb];"
-        f"[fg]scale={W}:-2:force_original_aspect_ratio=decrease[fgs];"
-        "[bgb][fgs]overlay=(W-w)/2:(H-h)/2[base];"
-        f"[base]ass='{ass}'[subbed]"
-    )
+    if opts.reframe and focus_x is not None:
+        # Özneye ortalanmış kırpma: yüksekliği doldur, odak noktası çevresinde genişlikte kes
+        fx = min(1.0, max(0.0, focus_x))
+        v = (
+            f"[0:v]scale=-2:{H}:force_original_aspect_ratio=increase,"
+            f"crop={W}:{H}:x='(iw-{W})*{fx:.4f}':y=0[base];"
+            f"[base]ass='{ass}'[subbed]"
+        )
+    else:
+        # Bulanık arka plan + ortalanmış video
+        v = (
+            "[0:v]split=2[bg][fg];"
+            f"[bg]scale={W}:{H}:force_original_aspect_ratio=increase,"
+            f"crop={W}:{H},boxblur=luma_radius=40:luma_power=1[bgb];"
+            f"[fg]scale={W}:-2:force_original_aspect_ratio=decrease[fgs];"
+            "[bgb][fgs]overlay=(W-w)/2:(H-h)/2[base];"
+            f"[base]ass='{ass}'[subbed]"
+        )
     last = "subbed"
 
     if logo_idx is not None:

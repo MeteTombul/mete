@@ -13,9 +13,11 @@ from . import claude_client
 from . import download as download_mod
 from . import effects as effects_mod
 from . import moments as moments_mod
+from . import reframe as reframe_mod
 from . import scenes as scenes_mod
 from . import subtitles as subtitles_mod
 from . import transcribe as transcribe_mod
+from . import uploaders as uploaders_mod
 from .config import RenderOptions
 from .transcribe import Transcript
 
@@ -50,6 +52,8 @@ def _process_video(
     clip_min: int,
     clip_max: int,
     use_scenes: bool,
+    upload_targets: list[str],
+    secrets_dir: Path,
     log,
 ) -> list[dict]:
     tag = f"[Video {index}/{total}]"
@@ -88,9 +92,13 @@ def _process_video(
             transcript, start, end, ass_path, opts, hook=m.get("hook")
         )
 
+        focus_x = None
+        if opts.reframe:
+            focus_x = reframe_mod.compute_focus_x(src, start, end)
+
         clip_path = clips_dir / f"{base}.mp4"
         try:
-            effects_mod.render_clip(src, ass_path, start, end, clip_path, opts)
+            effects_mod.render_clip(src, ass_path, start, end, clip_path, opts, focus_x=focus_x)
         except Exception as e:  # noqa: BLE001
             log(f"{tag} ! Klip üretilemedi ({base}): {e}")
             continue
@@ -142,6 +150,30 @@ def _process_video(
             except Exception as e:  # noqa: BLE001
                 log(f"{tag} ! SEO metası üretilemedi ({base}): {e}")
 
+        # Otomatik yükleme (resmî API + OAuth)
+        if upload_targets:
+            uploads = []
+            for platform in upload_targets:
+                try:
+                    up = uploaders_mod.get_uploader(platform, secrets_dir)
+                    if not up.is_configured():
+                        log(f"{tag} ↷ {platform}: yapılandırılmamış, atlandı ({up.authorize()})")
+                        uploads.append({"platform": platform, "status": "skipped"})
+                        continue
+                    res = up.upload(clip_path, meta)
+                    uploads.append({
+                        "platform": res.platform, "status": res.status,
+                        "url": res.url, "id": res.id, "error": res.error,
+                    })
+                    if res.status == "ok":
+                        log(f"{tag} ⇪ {platform}: yüklendi {res.url or res.id or ''}")
+                    else:
+                        log(f"{tag} ⚠ {platform}: {res.error}")
+                except Exception as e:  # noqa: BLE001
+                    log(f"{tag} ⚠ {platform} yükleme hatası: {e}")
+                    uploads.append({"platform": platform, "status": "error", "error": str(e)})
+            meta["uploads"] = uploads
+
         results.append(meta)
         log(f"{tag} ✓ {clip_path.name}  —  “{m.get('title')}”  (puan: {m.get('score')})")
 
@@ -160,6 +192,8 @@ def run(
     clip_max: int = 60,
     use_scenes: bool = True,
     workers: int = 1,
+    upload_targets: list[str] | None = None,
+    secrets_dir: Path | None = None,
     log=print,
 ) -> list[dict]:
     """Tüm akışı çalıştırır ve üretilen kliplerin meta verilerini döndürür."""
@@ -168,6 +202,8 @@ def run(
     clips_dir = out_dir / "klipler"
     work.mkdir(parents=True, exist_ok=True)
     clips_dir.mkdir(parents=True, exist_ok=True)
+    upload_targets = upload_targets or []
+    secrets_dir = Path(secrets_dir) if secrets_dir else (out_dir / "secrets")
 
     def safe_log(msg):
         with _print_lock:
@@ -190,7 +226,7 @@ def run(
         return _process_video(
             i, total, video, work, clips_dir, opts,
             whisper_model, whisper_device, moments_per_video,
-            clip_min, clip_max, use_scenes, safe_log,
+            clip_min, clip_max, use_scenes, upload_targets, secrets_dir, safe_log,
         )
 
     if workers <= 1:

@@ -2,7 +2,16 @@
 
 Bir YouTube kanalının **en çok izlenen** videolarını tarar, her videodaki **viral olabilecek anları** yapay zekâ ile bulur, o anlardan **dikey (9:16 Shorts/Reels) klipler** keser, üzerine **Türkçe altyazı** basar ve klibin **başına/sonuna efekt** ekler.
 
-Ekstra olarak: **karaoke altyazı** (kelime kelime vurgu), **sahne kesimine hizalama**, **kapak görseli**, **SEO başlık/açıklama/hashtag**, **ilerleme çubuğu**, **ses normalizasyonu**, **logo/watermark**, **arka plan müziği** (ducking'li), **format seçeneği** (9:16 / 1:1 / 16:9), **SRT dışa aktarımı** ve **paralel işleme**.
+Ekstra olarak: **karaoke altyazı** (kelime kelime vurgu), **sahne kesimine hizalama**, **kapak görseli**, **SEO başlık/açıklama/hashtag**, **ilerleme çubuğu**, **ses normalizasyonu**, **logo/watermark**, **arka plan müziği** (ducking'li), **format seçeneği** (9:16 / 1:1 / 16:9), **SRT dışa aktarımı**, **paralel işleme**, **yüz tespitiyle akıllı kırpma (auto-reframe)**, **web arayüzü** ve **YouTube / TikTok / Instagram'a otomatik yükleme**.
+
+## 🔒 Hesap erişimi hakkında (önemli)
+
+Otomatik yükleme, hesaplarına **yalnızca her platformun resmî API'si ve OAuth ile** erişir:
+YouTube Data API, TikTok Content Posting API, Instagram Graph API. Bot **şifre saklamaz**,
+tarayıcıdan otomatik giriş yapmaz. Kendi geliştirici uygulamanı (client id/secret) oluşturup
+token verirsin; bot bu token ile **senin kendi** hesaplarına video yükler — içerik üreticiler
+için standart ve platform kurallarına uygun yöntem budur. Token dosyaları `secrets/` klasöründe
+tutulur ve `.gitignore` ile depoya girmez.
 
 > Yalnızca **izinli / telifsiz / kendi** içeriğiniz üzerinde kullanın. Başkasının içeriğini izinsiz indirmek ve yeniden yayınlamak YouTube kurallarına ve telif hakkına aykırı olabilir.
 
@@ -63,6 +72,7 @@ python -m viralbot "https://www.youtube.com/@KANAL" \
 
 # Biçim ve efektler
   --aspect 9:16 \         # 9:16 | 1:1 | 16:9
+  --reframe \             # yüz tespitiyle özneye ortalanmış kırpma
   --logo logo.png \       # köşeye watermark
   --music fon.mp3 \       # arka plan müziği (ducking'li)
   --music-volume 0.12 \
@@ -73,7 +83,44 @@ python -m viralbot "https://www.youtube.com/@KANAL" \
 # Kapatma anahtarları
   --no-karaoke  --no-scenes  --no-progress-bar \
   --no-loudnorm --no-thumbnail --no-srt --no-metadata
+
+# Otomatik yükleme
+  --upload youtube,tiktok,instagram \
+  --secrets-dir secrets
 ```
+
+## 🌐 Web arayüzü
+
+Terminal yerine tarayıcıdan kullanmak için:
+
+```bash
+python -m viralbot.webapp
+# Tarayıcı: http://127.0.0.1:5000
+```
+
+Arayüzden kanal URL'si + seçenekleri girip **Başlat**'a basarsın; canlı log akar,
+üretilen klipleri izleyip indirebilir ve tek tıkla platformlara yükleyebilirsin.
+
+## ⇪ Otomatik yükleme kurulumu
+
+Tokenlar `--secrets-dir` (vars. `cikti/secrets`) klasöründen okunur.
+
+**YouTube**
+1. Google Cloud Console → "YouTube Data API v3"ü etkinleştir.
+2. OAuth istemcisi (Masaüstü) oluştur, JSON'u `secrets/youtube_client_secret.json` yap.
+3. İlk kez yetkilendir: `python -m viralbot --authorize youtube "x"` — tarayıcı açılır,
+   kendi hesabınla onay verirsin; token `secrets/youtube_token.json`'a kaydedilir.
+
+**TikTok**
+- developers.tiktok.com'da uygulama + `video.publish` izni al, OAuth ile access token üret.
+- `TIKTOK_ACCESS_TOKEN` env değişkeni ya da `secrets/tiktok_token.txt` dosyasına yaz.
+- Uygulama onaylı değilse videolar yalnızca özel (SELF_ONLY) yüklenir.
+
+**Instagram** (Reels)
+- Professional/Business hesap + bağlı Facebook Sayfası gerekir.
+- Uzun ömürlü access token ve `ig_user_id` al, `secrets/instagram.json`'a yaz.
+- IG Graph API yerel dosya kabul etmez: klibi herkese açık bir URL'ye koyup
+  `ozet.json` meta'sındaki `public_url` alanına o adresi vermelisin.
 
 ## Klip başına üretilen dosyalar
 
@@ -103,6 +150,9 @@ python -m viralbot "https://www.youtube.com/@KANAL" \
 | `scenes.py` | Sahne değişimi tespiti ve klip sınırlarını hizalama |
 | `subtitles.py` | Karaoke/düz ASS altyazı + SRT dışa aktarımı |
 | `effects.py` | ffmpeg: kesme, format, efekt, altyazı gömme, kapak |
+| `reframe.py` | OpenCV ile yüz tespiti → akıllı dikey kırpma odağı |
 | `config.py` | Render seçenekleri (biçim, tema, efekt anahtarları) |
-| `pipeline.py` | Uçtan uca akış (paralel işleme) |
+| `pipeline.py` | Uçtan uca akış (paralel işleme, yükleme) |
+| `uploaders/` | YouTube / TikTok / Instagram resmî API yükleyicileri |
+| `webapp.py` | Flask web arayüzü |
 | `cli.py` | Komut satırı arayüzü |
