@@ -3,12 +3,8 @@ yt-dlp>=2024.1.0
 faster-whisper>=1.0.0
 python-dotenv>=1.0.0
 
-# Web arayüzü
+# Web arayüzü (uygulama Chrome'un uygulama modunda açılır)
 flask>=3.0.0
-
-# Masaüstü uygulaması penceresi (opsiyonel; yoksa tarayıcıda açılır)
-# Windows 10/11'de yerleşik Edge WebView2 kullanır, ek kurulum gerekmez.
-pywebview>=5.0
 
 # HTTP (TikTok / Instagram API çağrıları)
 requests>=2.31.0

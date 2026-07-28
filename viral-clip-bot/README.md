@@ -43,7 +43,7 @@ Terminal bilmene gerek yok — çift tıkla açılan bir uygulama penceresi olar
 3. Klasördeki **`Baslat.bat`** dosyasına **çift tıkla**.
    - İlk açılışta gerekli her şeyi otomatik kurar (birkaç dakika).
    - `.env` dosyası oluşur → içine **`ANTHROPIC_API_KEY`** anahtarını yaz.
-   - Uygulama kendi penceresinde açılır; kanal URL'sini gir, **Başlat**'a bas.
+   - Uygulama, **Chrome'un uygulama penceresinde** (sekmesiz/adres çubuğusuz) açılır; kanal URL'sini gir, **Başlat**'a bas.
 
 ### macOS
 `Baslat.command` dosyasına çift tıkla (ilk seferde: sağ tık → **Aç**). `ffmpeg` için: `brew install ffmpeg`.
@@ -51,8 +51,9 @@ Terminal bilmene gerek yok — çift tıkla açılan bir uygulama penceresi olar
 ### Linux
 Terminalde `./baslat.sh` çalıştır. `ffmpeg` için: `sudo apt install ffmpeg`.
 
-> Uygulama penceresi, Windows 10/11'de yerleşik **Edge WebView2** ile açılır (ek kurulum yok).
-> Pencere açılamazsa uygulama otomatik olarak tarayıcıda açılır.
+> Uygulama, sistemde kurulu **Google Chrome**'u "uygulama modu" (`--app`) ile temiz, native
+> görünümlü bir pencerede açar (kendi ayrı profiliyle; normal Chrome oturumuna karışmaz).
+> Chrome yoksa **Edge** denenir, o da yoksa varsayılan tarayıcıda açılır.
 
 ---
 
