@@ -1,0 +1,6 @@
+# Derleme/paket çıktıları
+*.zip
+
+# Python
+__pycache__/
+*.pyc
