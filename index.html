@@ -50,18 +50,52 @@
   }
   .target {
     position: absolute;
+    top: 0;
+    left: 0;
     border-radius: 50%;
     background: radial-gradient(circle at 35% 30%, #fca5a5, #ef4444 55%, #b91c1c);
     box-shadow: 0 0 20px rgba(239, 68, 68, 0.6), inset 0 0 8px rgba(0,0,0,0.3);
     cursor: pointer;
-    transform: scale(0);
-    animation: pop 0.15s ease-out forwards;
+    will-change: transform;
   }
   .target.gold {
     background: radial-gradient(circle at 35% 30%, #fde68a, #f59e0b 55%, #b45309);
     box-shadow: 0 0 24px rgba(245, 158, 11, 0.8), inset 0 0 8px rgba(0,0,0,0.3);
   }
-  @keyframes pop { to { transform: scale(1); } }
+  /* Halka nişan efekti */
+  .target::after {
+    content: '';
+    position: absolute;
+    inset: 22%;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.25);
+    box-shadow: 0 0 0 3px rgba(255,255,255,0.15) inset;
+  }
+  .burst {
+    position: absolute;
+    top: 0; left: 0;
+    border-radius: 50%;
+    border: 3px solid #fff;
+    pointer-events: none;
+    animation: burst 0.4s ease-out forwards;
+    z-index: 4;
+  }
+  @keyframes burst {
+    from { transform: translate(var(--x), var(--y)) scale(0.6); opacity: 0.9; }
+    to   { transform: translate(var(--x), var(--y)) scale(2.2); opacity: 0; }
+  }
+  .spark {
+    position: absolute;
+    top: 0; left: 0;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 4;
+    animation: spark 0.5s ease-out forwards;
+  }
+  @keyframes spark {
+    to { opacity: 0; }
+  }
   .overlay {
     position: absolute;
     inset: 0;
@@ -95,6 +129,7 @@
   .hidden { display: none !important; }
   .float {
     position: absolute;
+    top: 0; left: 0;
     font-weight: 800;
     font-size: 1.1rem;
     pointer-events: none;
@@ -102,7 +137,7 @@
     z-index: 5;
   }
   @keyframes rise {
-    to { transform: translateY(-40px); opacity: 0; }
+    to { transform: translate(var(--x), calc(var(--y) - 40px)); opacity: 0; }
   }
   .hint { margin-top: 12px; color: #64748b; font-size: 0.85rem; }
 </style>
@@ -119,7 +154,7 @@
   <div id="arena">
     <div class="overlay" id="startScreen">
       <h2>Hazır mısın?</h2>
-      <p>Beliren hedeflere hızlıca tıkla! Kırmızı = 1 puan, altın hedef = 3 puan. Kaçırma!</p>
+      <p>Uçuşan hedefleri yakala! Kırmızı = 1 puan, altın hedef = 3 puan. Küçük ve hızlı olanlar daha çok puan getirir.</p>
       <button id="startBtn">Başla ▶</button>
     </div>
     <div class="overlay hidden" id="endScreen">
@@ -128,7 +163,7 @@
       <button id="restartBtn">Tekrar Oyna ↺</button>
     </div>
   </div>
-  <div class="hint">İpucu: Hedefler küçüldükçe puanlar değerlenir 😉</div>
+  <div class="hint">İpucu: Hedefler hızlandıkça puanları artar 😉</div>
 
 <script>
 (function () {
@@ -147,7 +182,12 @@
   const GAME_TIME = 30;
   let score = 0, miss = 0, timeLeft = GAME_TIME;
   let running = false;
-  let spawnTimer = null, countdownTimer = null, currentTarget = null, targetLifeTimer = null;
+  let countdownTimer = null;
+  let targets = [];
+  let rafId = null;
+  let lastTs = 0;
+  let spawnAccum = 0;
+  let elapsed = 0;
 
   let best = Number(localStorage.getItem('hedefRekor') || 0);
   bestEl.textContent = best;
@@ -159,69 +199,164 @@
     f.className = 'float';
     f.textContent = text;
     f.style.color = color;
-    f.style.left = x + 'px';
-    f.style.top = y + 'px';
+    f.style.setProperty('--x', (x - 10) + 'px');
+    f.style.setProperty('--y', y + 'px');
+    f.style.transform = `translate(${x - 10}px, ${y}px)`;
     arena.appendChild(f);
     setTimeout(() => f.remove(), 700);
   }
 
-  function clearTarget() {
-    if (currentTarget) { currentTarget.remove(); currentTarget = null; }
-    if (targetLifeTimer) { clearTimeout(targetLifeTimer); targetLifeTimer = null; }
+  function hitEffect(cx, cy, size, gold) {
+    // Genişleyen halka
+    const b = document.createElement('div');
+    b.className = 'burst';
+    b.style.width = size + 'px';
+    b.style.height = size + 'px';
+    b.style.borderColor = gold ? '#fbbf24' : '#fca5a5';
+    b.style.setProperty('--x', (cx - size / 2) + 'px');
+    b.style.setProperty('--y', (cy - size / 2) + 'px');
+    arena.appendChild(b);
+    setTimeout(() => b.remove(), 400);
+
+    // Kıvılcımlar
+    const colors = gold ? ['#fde68a', '#f59e0b', '#fff'] : ['#fecaca', '#ef4444', '#fff'];
+    for (let i = 0; i < 8; i++) {
+      const s = document.createElement('div');
+      s.className = 'spark';
+      s.style.background = colors[i % colors.length];
+      const ang = (Math.PI * 2 * i) / 8 + rand(-0.3, 0.3);
+      const dist = rand(24, 46);
+      const tx = cx + Math.cos(ang) * dist;
+      const ty = cy + Math.sin(ang) * dist;
+      s.style.transform = `translate(${cx}px, ${cy}px)`;
+      s.animate([
+        { transform: `translate(${cx}px, ${cy}px) scale(1)`, opacity: 1 },
+        { transform: `translate(${tx}px, ${ty}px) scale(0)`, opacity: 0 }
+      ], { duration: 500, easing: 'ease-out' });
+      arena.appendChild(s);
+      setTimeout(() => s.remove(), 500);
+    }
   }
 
-  function spawnTarget() {
-    if (!running) return;
-    clearTarget();
-
+  function makeTarget() {
     const isGold = Math.random() < 0.2;
-    const size = rand(30, 64);
-    const pad = 6;
-    const maxX = arena.clientWidth - size - pad;
-    const maxY = arena.clientHeight - size - pad;
+    const size = rand(30, 62);
+    const W = arena.clientWidth, H = arena.clientHeight;
 
-    const t = document.createElement('div');
-    t.className = 'target' + (isGold ? ' gold' : '');
-    t.style.width = size + 'px';
-    t.style.height = size + 'px';
-    t.style.left = rand(pad, maxX) + 'px';
-    t.style.top = rand(pad, maxY) + 'px';
+    // Zamanla artan hız
+    const speedBoost = 1 + elapsed / 30; // 1x -> 2x
+    const speed = rand(45, 110) * speedBoost;
+    const ang = rand(0, Math.PI * 2);
 
-    // Küçük hedef = daha çok puan
-    const sizeBonus = Math.round((64 - size) / 20); // 0..1-2
-    const points = (isGold ? 3 : 1) + sizeBonus;
+    const el = document.createElement('div');
+    el.className = 'target' + (isGold ? ' gold' : '');
+    el.style.width = size + 'px';
+    el.style.height = size + 'px';
 
-    t.addEventListener('pointerdown', function (e) {
+    const sizeBonus = Math.round((62 - size) / 20);
+    const speedBonus = speed > 130 ? 1 : 0;
+    const points = (isGold ? 3 : 1) + sizeBonus + speedBonus;
+
+    const t = {
+      el, size, isGold, points,
+      x: rand(0, W - size),
+      y: rand(0, H - size),
+      vx: Math.cos(ang) * speed,
+      vy: Math.sin(ang) * speed,
+      life: rand(3.2, 5),      // saniye
+      age: 0,
+      born: 0,                 // beliriş animasyonu ilerlemesi (0..1)
+      wob: rand(0, Math.PI * 2),
+      dead: false
+    };
+
+    el.addEventListener('pointerdown', function (e) {
       e.stopPropagation();
-      if (!running) return;
+      if (!running || t.dead) return;
+      t.dead = true;
       score += points;
       scoreEl.textContent = score;
-      const r = arena.getBoundingClientRect();
-      floatText(e.clientX - r.left, e.clientY - r.top, '+' + points, isGold ? '#fbbf24' : '#4ade80');
-      clearTarget();
-      nextSpawn(rand(180, 420));
+      const cx = t.x + size / 2, cy = t.y + size / 2;
+      floatText(cx, cy, '+' + points, isGold ? '#fbbf24' : '#4ade80');
+      hitEffect(cx, cy, size, isGold);
+      el.remove();
     });
 
-    currentTarget = t;
-    arena.appendChild(t);
-
-    // Hedef kaçırılırsa
-    const life = rand(800, 1400);
-    targetLifeTimer = setTimeout(() => {
-      if (!running) return;
-      miss++;
-      missEl.textContent = miss;
-      clearTarget();
-      nextSpawn(rand(150, 350));
-    }, life);
+    arena.appendChild(el);
+    targets.push(t);
   }
 
-  function nextSpawn(delay) {
-    if (spawnTimer) clearTimeout(spawnTimer);
-    spawnTimer = setTimeout(spawnTarget, delay);
+  function step(ts) {
+    if (!running) return;
+    if (!lastTs) lastTs = ts;
+    let dt = (ts - lastTs) / 1000;
+    lastTs = ts;
+    if (dt > 0.05) dt = 0.05; // sekme geçişlerinde sıçramayı önle
+    elapsed += dt;
+
+    const W = arena.clientWidth, H = arena.clientHeight;
+
+    // Hedef üretimi (zamanla sıklaşır)
+    spawnAccum += dt;
+    const interval = Math.max(0.35, 0.9 - elapsed / 45);
+    const maxTargets = 5;
+    if (spawnAccum >= interval && targets.filter(t => !t.dead).length < maxTargets) {
+      spawnAccum = 0;
+      makeTarget();
+    }
+
+    for (const t of targets) {
+      if (t.dead) continue;
+      t.age += dt;
+
+      // Beliriş (pop) animasyonu
+      if (t.born < 1) t.born = Math.min(1, t.born + dt * 6);
+
+      // Süresi dolanlar kaçmış sayılır
+      if (t.age >= t.life) {
+        t.dead = true;
+        miss++;
+        missEl.textContent = miss;
+        t.el.animate(
+          [{ opacity: 1 }, { opacity: 0, transform: t.el.style.transform + ' scale(0.4)' }],
+          { duration: 200, easing: 'ease-in' }
+        );
+        const el = t.el;
+        setTimeout(() => el.remove(), 200);
+        continue;
+      }
+
+      // Hareket
+      t.x += t.vx * dt;
+      t.y += t.vy * dt;
+
+      // Duvarlardan sekme
+      if (t.x <= 0) { t.x = 0; t.vx = Math.abs(t.vx); }
+      else if (t.x >= W - t.size) { t.x = W - t.size; t.vx = -Math.abs(t.vx); }
+      if (t.y <= 0) { t.y = 0; t.vy = Math.abs(t.vy); }
+      else if (t.y >= H - t.size) { t.y = H - t.size; t.vy = -Math.abs(t.vy); }
+
+      // Hafif nabız + beliriş ölçeği
+      t.wob += dt * 4;
+      const pulse = 1 + Math.sin(t.wob) * 0.05;
+      // Son yarım saniyede yanıp sönme uyarısı
+      let fade = 1;
+      const left = t.life - t.age;
+      if (left < 0.8) fade = 0.4 + 0.6 * Math.abs(Math.sin(t.age * 12));
+      const ease = t.born < 1 ? (t.born * (2 - t.born)) : 1; // easeOutQuad
+      const scale = ease * pulse;
+
+      t.el.style.opacity = fade;
+      t.el.style.transform = `translate(${t.x}px, ${t.y}px) scale(${scale})`;
+    }
+
+    // Ölü hedefleri listeden temizle
+    if (targets.length > 40) targets = targets.filter(t => !t.dead);
+
+    rafId = requestAnimationFrame(step);
   }
 
-  // Boş alana tıklarsan ıskalarsın
+  // Boş alana tıklama = ıska
   arena.addEventListener('pointerdown', function (e) {
     if (!running) return;
     const r = arena.getBoundingClientRect();
@@ -234,22 +369,29 @@
     if (timeLeft <= 0) endGame();
   }
 
+  function clearAll() {
+    targets.forEach(t => t.el.remove());
+    targets = [];
+  }
+
   function startGame() {
+    clearAll();
     score = 0; miss = 0; timeLeft = GAME_TIME; running = true;
+    elapsed = 0; spawnAccum = 0; lastTs = 0;
     scoreEl.textContent = '0';
     missEl.textContent = '0';
     timeEl.textContent = GAME_TIME;
     startScreen.classList.add('hidden');
     endScreen.classList.add('hidden');
     countdownTimer = setInterval(tick, 1000);
-    nextSpawn(400);
+    rafId = requestAnimationFrame(step);
   }
 
   function endGame() {
     running = false;
     clearInterval(countdownTimer);
-    if (spawnTimer) clearTimeout(spawnTimer);
-    clearTarget();
+    if (rafId) cancelAnimationFrame(rafId);
+    clearAll();
 
     let newRecord = false;
     if (score > best) {
