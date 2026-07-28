@@ -19,6 +19,8 @@ def download_video(url: str, out_dir: Path, max_height: int = 1080) -> Path:
     opts = {
         "quiet": True,
         "no_warnings": True,
+        "no_color": True,
+        "noprogress": True,
         "outtmpl": outtmpl,
         "format": (
             f"bestvideo[height<={max_height}][ext=mp4]+bestaudio[ext=m4a]/"

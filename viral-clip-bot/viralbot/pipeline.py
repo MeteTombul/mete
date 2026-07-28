@@ -237,7 +237,10 @@ def run(
 
     if workers <= 1:
         for item in enumerate(videos, 1):
-            results.extend(work_fn(item))
+            try:
+                results.extend(work_fn(item))
+            except Exception as e:  # noqa: BLE001
+                safe_log(f"! Video atlandı ({item[1].title}): {e}")
     else:
         with ThreadPoolExecutor(max_workers=workers) as ex:
             futs = [ex.submit(work_fn, item) for item in enumerate(videos, 1)]

@@ -35,6 +35,7 @@ def list_top_videos(channel_url: str, limit: int = 5) -> list[Video]:
     opts = {
         "quiet": True,
         "no_warnings": True,
+        "no_color": True,
         "extract_flat": "in_playlist",
         "skip_download": True,
     }
@@ -77,6 +78,7 @@ def list_latest_videos(channel_url: str, limit: int = 5) -> list[Video]:
     opts = {
         "quiet": True,
         "no_warnings": True,
+        "no_color": True,
         "extract_flat": "in_playlist",
         "skip_download": True,
         "playlistend": limit,
