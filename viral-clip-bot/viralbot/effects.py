@@ -112,8 +112,9 @@ def render_clip(
 
     if opts.progress_bar:
         bar_h = max(8, int(H * 0.008))
+        # drawbox ifadelerinde giriş boyutları iw/ih'dir (overlay'deki W/H değil).
         v += (
-            f";[{last}]drawbox=x=0:y=H-{bar_h}:w='W*t/{dur:.3f}':h={bar_h}:"
+            f";[{last}]drawbox=x=0:y=ih-{bar_h}:w='iw*t/{dur:.3f}':h={bar_h}:"
             f"color=0xF5A623@0.9:t=fill[pb]"
         )
         last = "pb"
