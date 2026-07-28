@@ -9,10 +9,24 @@ from .config import RenderOptions
 
 
 def _escape_for_filter(path: Path) -> str:
-    """ffmpeg filtergraph içinde dosya yolunu güvenli hale getirir."""
-    s = str(path)
-    s = s.replace("\\", "\\\\").replace(":", r"\:").replace("'", r"\'")
+    """ffmpeg filtergraph içinde dosya yolunu güvenli hale getirir (Windows dâhil).
+
+    Windows'ta ters bölü yerine düz bölü kullanmak en güvenilir yöntemdir;
+    yalnızca sürücü harfindeki iki nokta ve kesme işareti kaçırılır.
+    Örn:  C:\\Users\\x\\a.ass  ->  C\\:/Users/x/a.ass
+    """
+    s = str(path).replace("\\", "/")
+    s = s.replace(":", r"\:").replace("'", r"\'")
     return s
+
+
+def _run_ffmpeg(cmd: list[str]) -> None:
+    """ffmpeg çalıştırır; hata olursa stderr sonunu içeren anlaşılır bir hata fırlatır."""
+    proc = subprocess.run(cmd, capture_output=True)
+    if proc.returncode != 0:
+        err = proc.stderr.decode("utf-8", "replace").strip()
+        tail = err[-1600:] if err else "(çıktı yok)"
+        raise RuntimeError(f"ffmpeg başarısız (kod {proc.returncode}):\n{tail}")
 
 
 def probe_duration(path: Path) -> float:
@@ -141,7 +155,7 @@ def render_clip(
         str(out_path),
     ]
 
-    subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
+    _run_ffmpeg(cmd)
     return out_path
 
 
@@ -185,15 +199,10 @@ Dialogue: 0,0:00:00.00,0:00:05.00,Title,,0,0,0,,{safe_title}
         f"scale={W}:{H}:force_original_aspect_ratio=increase,crop={W}:{H},"
         f"eq=brightness=-0.12,ass='{ass}'"
     )
-    subprocess.run(
-        [
-            "ffmpeg", "-y", "-ss", f"{at_time:.3f}", "-i", str(source),
-            "-frames:v", "1", "-vf", vf, "-q:v", "3",
-            str(out_path),
-        ],
-        check=True,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.PIPE,
-    )
+    _run_ffmpeg([
+        "ffmpeg", "-y", "-ss", f"{at_time:.3f}", "-i", str(source),
+        "-frames:v", "1", "-vf", vf, "-q:v", "3",
+        str(out_path),
+    ])
     title_ass.unlink(missing_ok=True)
     return out_path
