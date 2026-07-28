@@ -32,7 +32,31 @@ Kanal URL'si
 
 Çıktı: `cikti/klipler/*.mp4` ve tüm klipleri özetleyen `cikti/ozet.json`.
 
-## Kurulum
+## 🖥️ Masaüstü uygulaması olarak çalıştırma (en kolay)
+
+Terminal bilmene gerek yok — çift tıkla açılan bir uygulama penceresi olarak gelir.
+
+### Windows
+1. **Python 3.10+** kur → https://www.python.org/downloads/
+   Kurulumda **“Add Python to PATH”** kutusunu işaretle.
+2. **ffmpeg** kur → https://www.gyan.dev/ffmpeg/builds/ (indir, `bin` klasörünü PATH'e ekle).
+3. Klasördeki **`Baslat.bat`** dosyasına **çift tıkla**.
+   - İlk açılışta gerekli her şeyi otomatik kurar (birkaç dakika).
+   - `.env` dosyası oluşur → içine **`ANTHROPIC_API_KEY`** anahtarını yaz.
+   - Uygulama kendi penceresinde açılır; kanal URL'sini gir, **Başlat**'a bas.
+
+### macOS
+`Baslat.command` dosyasına çift tıkla (ilk seferde: sağ tık → **Aç**). `ffmpeg` için: `brew install ffmpeg`.
+
+### Linux
+Terminalde `./baslat.sh` çalıştır. `ffmpeg` için: `sudo apt install ffmpeg`.
+
+> Uygulama penceresi, Windows 10/11'de yerleşik **Edge WebView2** ile açılır (ek kurulum yok).
+> Pencere açılamazsa uygulama otomatik olarak tarayıcıda açılır.
+
+---
+
+## Kurulum (geliştirici / manuel)
 
 Gereksinimler: **Python 3.10+**, **ffmpeg** (ve ffprobe) sistemde kurulu olmalı.
 
