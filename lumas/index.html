@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lumas Butik · Zarafetin Yeni Adresi</title>
+<meta name="description" content="Lumas Butik — kadın giyiminde zarif, modern ve özenle seçilmiş parçalar.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #faf7f2;
+    --ivory: #ffffff;
+    --sand: #f2ece2;
+    --ink: #2b2622;
+    --ink-soft: #5a5148;
+    --muted: #9a8f82;
+    --line: #e8e0d4;
+    --gold: #b8925a;
+    --gold-d: #9c7a45;
+    --rose: #c98a86;
+    --shadow: 0 18px 50px rgba(43, 38, 34, 0.10);
+    --serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
+    --sans: 'Jost', 'Segoe UI', system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--sans);
+    background: var(--cream);
+    color: var(--ink);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; text-decoration: none; }
+  img { max-width: 100%; display: block; }
+  button { font-family: inherit; cursor: pointer; }
+  .serif { font-family: var(--serif); }
+  .wrap { width: min(92vw, 1200px); margin: 0 auto; }
+  .eyebrow { font-size: 0.72rem; letter-spacing: 3px; text-transform: uppercase; color: var(--gold-d); font-weight: 600; }
+  .hidden { display: none !important; }
+
+  /* ---------- Announcement ---------- */
+  .announce {
+    background: var(--ink); color: #f3ece0;
+    text-align: center; font-size: 0.76rem; letter-spacing: 1.5px;
+    text-transform: uppercase; padding: 9px 12px;
+  }
+  .announce b { color: var(--gold); }
+
+  /* ---------- Header ---------- */
+  header {
+    position: sticky; top: 0; z-index: 30;
+    background: rgba(250,247,242,0.86);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+  }
+  .nav {
+    display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
+    padding: 16px 0;
+  }
+  .nav-left { display: flex; gap: 26px; }
+  .nav-left a { font-size: 0.82rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--ink-soft); font-weight: 500; transition: color .18s; }
+  .nav-left a:hover { color: var(--gold-d); }
+  .logo { text-align: center; font-family: var(--serif); font-size: 1.9rem; font-weight: 700; letter-spacing: 6px; color: var(--ink); }
+  .logo small { display: block; font-family: var(--sans); font-size: 0.56rem; letter-spacing: 5px; color: var(--muted); font-weight: 400; margin-top: -4px; }
+  .nav-right { display: flex; gap: 18px; justify-content: flex-end; align-items: center; }
+  .icon-link { position: relative; font-size: 1.15rem; color: var(--ink); background: none; border: none; line-height: 1; }
+  .cart-count {
+    position: absolute; top: -8px; right: -10px;
+    background: var(--gold); color: #fff; font-size: 0.62rem; font-weight: 700;
+    min-width: 17px; height: 17px; border-radius: 999px;
+    display: flex; align-items: center; justify-content: center; padding: 0 4px;
+    font-family: var(--sans);
+  }
+  .burger { display: none; font-size: 1.3rem; background: none; border: none; }
+
+  /* ---------- Hero ---------- */
+  .hero {
+    position: relative; overflow: hidden;
+    background:
+      radial-gradient(1100px 520px at 78% -10%, #efe1cf 0%, rgba(239,225,207,0) 60%),
+      radial-gradient(900px 500px at 8% 110%, #ecd9d2 0%, rgba(236,217,210,0) 55%),
+      var(--cream);
+  }
+  .hero-inner { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 40px; align-items: center; padding: 74px 0 84px; }
+  .hero h1 { font-family: var(--serif); font-size: clamp(2.5rem, 6vw, 4.3rem); font-weight: 600; line-height: 1.05; margin: 18px 0 20px; letter-spacing: -0.5px; }
+  .hero h1 em { font-style: italic; color: var(--gold-d); }
+  .hero p { font-size: 1.05rem; color: var(--ink-soft); max-width: 440px; margin-bottom: 30px; font-weight: 300; }
+  .hero-cta { display: flex; gap: 14px; flex-wrap: wrap; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 9px;
+    padding: 14px 30px; font-size: 0.82rem; letter-spacing: 2px; text-transform: uppercase;
+    font-weight: 500; border-radius: 999px; border: 1px solid var(--ink);
+    background: var(--ink); color: var(--cream);
+    transition: transform .12s, box-shadow .2s, background .2s, color .2s;
+  }
+  .btn:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(43,38,34,0.22); }
+  .btn.outline { background: transparent; color: var(--ink); }
+  .btn.outline:hover { background: var(--ink); color: var(--cream); }
+  .btn.gold { background: var(--gold); border-color: var(--gold); color: #fff; }
+  .btn.gold:hover { background: var(--gold-d); border-color: var(--gold-d); }
+  .btn.sm { padding: 10px 18px; font-size: 0.72rem; }
+  .btn.block { width: 100%; justify-content: center; }
+  .btn[disabled] { opacity: .45; cursor: not-allowed; transform: none; box-shadow: none; }
+
+  .hero-visual { position: relative; height: 440px; }
+  .hv-card {
+    position: absolute; border-radius: 18px; box-shadow: var(--shadow); overflow: hidden;
+    background: var(--sand);
+  }
+  .hv-1 { inset: 0 32% 22% 0; }
+  .hv-2 { width: 46%; height: 58%; right: 0; top: 8%; }
+  .hv-3 { width: 40%; height: 34%; right: 6%; bottom: 4%; }
+  .hv-card .ph { width: 100%; height: 100%; }
+  .hero-badge {
+    position: absolute; left: -6px; bottom: 34px; z-index: 2;
+    background: var(--ivory); border: 1px solid var(--line); border-radius: 14px;
+    padding: 12px 18px; box-shadow: var(--shadow); font-size: 0.8rem;
+  }
+  .hero-badge b { font-family: var(--serif); font-size: 1.1rem; display: block; color: var(--gold-d); }
+
+  /* ---------- Section base ---------- */
+  section.block { padding: 78px 0; }
+  .sec-head { text-align: center; max-width: 560px; margin: 0 auto 44px; }
+  .sec-head h2 { font-family: var(--serif); font-size: clamp(1.9rem, 4vw, 2.7rem); font-weight: 600; margin: 10px 0 12px; }
+  .sec-head p { color: var(--ink-soft); font-weight: 300; }
+
+  /* ---------- Categories ---------- */
+  .cat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+  .cat-card {
+    position: relative; border-radius: 16px; overflow: hidden; aspect-ratio: 3/4;
+    box-shadow: var(--shadow); cursor: pointer;
+  }
+  .cat-card .ph { position: absolute; inset: 0; transition: transform .5s ease; }
+  .cat-card:hover .ph { transform: scale(1.06); }
+  .cat-card .cap {
+    position: absolute; inset: auto 0 0 0; padding: 22px 18px 18px;
+    background: linear-gradient(to top, rgba(30,26,22,0.72), rgba(30,26,22,0));
+    color: #fff;
+  }
+  .cat-card .cap b { font-family: var(--serif); font-size: 1.25rem; font-weight: 600; }
+  .cat-card .cap span { display: block; font-size: 0.72rem; letter-spacing: 1.5px; text-transform: uppercase; opacity: .8; }
+
+  /* ---------- Products ---------- */
+  .prod-section { background: var(--ivory); }
+  .tabs { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 38px; }
+  .tab {
+    padding: 9px 20px; border-radius: 999px; border: 1px solid var(--line);
+    background: transparent; color: var(--ink-soft); font-size: 0.8rem; letter-spacing: 1px;
+    text-transform: uppercase; font-weight: 500; transition: all .18s;
+  }
+  .tab:hover { border-color: var(--gold); color: var(--gold-d); }
+  .tab.active { background: var(--ink); color: var(--cream); border-color: var(--ink); }
+  .prod-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 26px; }
+  .prod-card { background: var(--cream); border-radius: 16px; overflow: hidden; border: 1px solid var(--line); transition: transform .2s, box-shadow .25s; display: flex; flex-direction: column; }
+  .prod-card:hover { transform: translateY(-5px); box-shadow: var(--shadow); }
+  .prod-media { position: relative; aspect-ratio: 3/4; overflow: hidden; background: var(--sand); }
+  .prod-media .ph { position: absolute; inset: 0; transition: transform .5s ease; }
+  .prod-card:hover .prod-media .ph { transform: scale(1.05); }
+  .prod-tag {
+    position: absolute; top: 12px; left: 12px; z-index: 2;
+    background: rgba(255,255,255,0.92); color: var(--ink); font-size: 0.66rem; letter-spacing: 1px;
+    text-transform: uppercase; font-weight: 600; padding: 5px 11px; border-radius: 999px;
+  }
+  .prod-tag.out { background: rgba(43,38,34,0.85); color: #fff; }
+  .prod-tag.gold { background: var(--gold); color: #fff; }
+  .quick-add {
+    position: absolute; left: 12px; right: 12px; bottom: 12px; z-index: 2;
+    opacity: 0; transform: translateY(10px); transition: all .22s;
+  }
+  .prod-card:hover .quick-add { opacity: 1; transform: translateY(0); }
+  .prod-body { padding: 16px 18px 20px; display: flex; flex-direction: column; gap: 4px; flex: 1; }
+  .prod-body .pcat { font-size: 0.68rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); }
+  .prod-body .pname { font-family: var(--serif); font-size: 1.12rem; font-weight: 600; line-height: 1.25; }
+  .prod-body .pprice { margin-top: auto; padding-top: 8px; font-size: 1.05rem; font-weight: 600; color: var(--gold-d); }
+  .prod-empty { text-align: center; padding: 60px 20px; color: var(--muted); grid-column: 1/-1; }
+
+  /* placeholder art */
+  .ph { display: flex; align-items: center; justify-content: center; position: relative; }
+  .ph::before {
+    content: ''; position: absolute; inset: 0;
+    background-image: linear-gradient(115deg, rgba(255,255,255,0.28), rgba(255,255,255,0) 42%);
+  }
+  .ph .mono { font-family: var(--serif); font-size: 2.3rem; color: rgba(255,255,255,0.85); letter-spacing: 3px; font-weight: 600; text-shadow: 0 2px 12px rgba(0,0,0,0.12); }
+
+  /* ---------- Values ---------- */
+  .values { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; }
+  .value { text-align: center; padding: 10px; }
+  .value .vi { font-size: 1.7rem; }
+  .value h4 { font-family: var(--serif); font-size: 1.2rem; font-weight: 600; margin: 10px 0 6px; }
+  .value p { color: var(--ink-soft); font-size: 0.9rem; font-weight: 300; }
+
+  /* ---------- Story ---------- */
+  .story { background: linear-gradient(135deg, #efe3d3, #ece0e0); border-radius: 24px; overflow: hidden; }
+  .story-inner { display: grid; grid-template-columns: 1fr 1fr; }
+  .story-text { padding: 60px 54px; }
+  .story-text h2 { font-family: var(--serif); font-size: clamp(1.8rem, 3.6vw, 2.6rem); font-weight: 600; margin: 12px 0 16px; }
+  .story-text p { color: var(--ink-soft); margin-bottom: 22px; font-weight: 300; }
+  .story-visual { min-height: 340px; }
+
+  /* ---------- Newsletter ---------- */
+  .news { text-align: center; }
+  .news-form { display: flex; gap: 10px; max-width: 460px; margin: 24px auto 0; }
+  .news-form input {
+    flex: 1; padding: 14px 18px; border: 1px solid var(--line); border-radius: 999px;
+    background: var(--ivory); font-family: inherit; font-size: 0.92rem; color: var(--ink); outline: none;
+  }
+  .news-form input:focus { border-color: var(--gold); }
+
+  /* ---------- Footer ---------- */
+  footer { background: var(--ink); color: #d9cfc0; padding: 60px 0 26px; }
+  .foot-grid { display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr; gap: 30px; }
+  .foot-brand .logo { text-align: left; color: #fff; }
+  .foot-brand p { font-size: 0.9rem; color: #b3a996; max-width: 280px; margin-top: 14px; font-weight: 300; }
+  footer h5 { font-size: 0.74rem; letter-spacing: 2px; text-transform: uppercase; color: #fff; margin-bottom: 16px; }
+  footer ul { list-style: none; }
+  footer ul li { margin-bottom: 10px; }
+  footer ul li a { font-size: 0.88rem; color: #c4baaa; transition: color .15s; }
+  footer ul li a:hover { color: var(--gold); }
+  .foot-bottom { border-top: 1px solid rgba(255,255,255,0.1); margin-top: 40px; padding-top: 20px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; font-size: 0.78rem; color: #9d9384; }
+
+  /* ---------- Cart drawer ---------- */
+  .overlay-mask { position: fixed; inset: 0; background: rgba(30,24,18,0.5); backdrop-filter: blur(3px); z-index: 40; opacity: 0; pointer-events: none; transition: opacity .25s; }
+  .overlay-mask.show { opacity: 1; pointer-events: auto; }
+  .drawer {
+    position: fixed; top: 0; right: 0; height: 100%; width: min(92vw, 420px); z-index: 50;
+    background: var(--cream); box-shadow: -20px 0 60px rgba(0,0,0,0.25);
+    transform: translateX(100%); transition: transform .3s ease; display: flex; flex-direction: column;
+  }
+  .drawer.show { transform: translateX(0); }
+  .drawer-head { display: flex; align-items: center; justify-content: space-between; padding: 22px 24px; border-bottom: 1px solid var(--line); }
+  .drawer-head h3 { font-family: var(--serif); font-size: 1.4rem; font-weight: 600; }
+  .x { background: none; border: none; font-size: 1.4rem; color: var(--ink-soft); line-height: 1; }
+  .cart-items { flex: 1; overflow-y: auto; padding: 12px 24px; }
+  .cart-empty { text-align: center; color: var(--muted); padding: 60px 20px; }
+  .cart-empty .big { font-size: 2.4rem; margin-bottom: 10px; }
+  .ci { display: grid; grid-template-columns: 62px 1fr auto; gap: 14px; padding: 16px 0; border-bottom: 1px solid var(--line); align-items: center; }
+  .ci-media { width: 62px; height: 78px; border-radius: 10px; overflow: hidden; }
+  .ci-media .ph { width: 100%; height: 100%; }
+  .ci-media .mono { font-size: 1.1rem; }
+  .ci-info .n { font-family: var(--serif); font-size: 1rem; font-weight: 600; line-height: 1.2; }
+  .ci-info .p { color: var(--gold-d); font-weight: 600; font-size: 0.9rem; margin-top: 2px; }
+  .qty { display: inline-flex; align-items: center; gap: 8px; margin-top: 8px; border: 1px solid var(--line); border-radius: 999px; padding: 3px 6px; background: var(--ivory); }
+  .qty button { width: 22px; height: 22px; border: none; background: none; font-size: 1rem; color: var(--ink); line-height: 1; }
+  .qty span { min-width: 18px; text-align: center; font-size: 0.9rem; }
+  .ci-rem { background: none; border: none; color: var(--muted); font-size: 0.72rem; letter-spacing: 1px; text-transform: uppercase; margin-top: 6px; }
+  .ci-rem:hover { color: var(--rose); }
+  .drawer-foot { padding: 20px 24px 26px; border-top: 1px solid var(--line); background: var(--ivory); }
+  .cart-total { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 16px; }
+  .cart-total .lbl { font-size: 0.8rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); }
+  .cart-total .amt { font-family: var(--serif); font-size: 1.7rem; font-weight: 600; }
+
+  /* ---------- Modal ---------- */
+  .modal-mask { position: fixed; inset: 0; background: rgba(30,24,18,0.55); backdrop-filter: blur(4px); z-index: 60; display: flex; align-items: center; justify-content: center; padding: 20px; }
+  .modal { width: min(94vw, 480px); background: var(--cream); border-radius: 20px; overflow: hidden; box-shadow: 0 30px 90px rgba(0,0,0,0.35); max-height: 92vh; overflow-y: auto; }
+  .modal-head { padding: 24px 26px 0; }
+  .modal-head h3 { font-family: var(--serif); font-size: 1.6rem; font-weight: 600; }
+  .modal-head p { color: var(--ink-soft); font-size: 0.9rem; font-weight: 300; margin-top: 4px; }
+  .modal-body { padding: 20px 26px 26px; }
+  .fld { margin-bottom: 14px; }
+  .fld label { display: block; font-size: 0.74rem; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+  .fld input, .fld textarea {
+    width: 100%; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px;
+    background: var(--ivory); font-family: inherit; font-size: 0.95rem; color: var(--ink); outline: none; resize: vertical;
+  }
+  .fld input:focus, .fld textarea:focus { border-color: var(--gold); }
+  .order-sum { background: var(--sand); border-radius: 12px; padding: 14px 16px; margin-bottom: 16px; font-size: 0.9rem; }
+  .order-sum .row { display: flex; justify-content: space-between; padding: 3px 0; color: var(--ink-soft); }
+  .order-sum .row.tot { border-top: 1px dashed var(--line); margin-top: 6px; padding-top: 8px; font-weight: 600; color: var(--ink); }
+  .success { text-align: center; padding: 30px 26px 34px; }
+  .success .ok { width: 66px; height: 66px; border-radius: 50%; background: var(--gold); color: #fff; font-size: 2rem; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; }
+  .success h3 { font-family: var(--serif); font-size: 1.6rem; font-weight: 600; }
+  .success p { color: var(--ink-soft); margin: 8px 0 20px; font-weight: 300; }
+
+  /* ---------- Toast ---------- */
+  .toasts { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%); z-index: 90; display: flex; flex-direction: column; gap: 10px; align-items: center; }
+  .toast { background: var(--ink); color: #f3ece0; padding: 12px 22px; border-radius: 999px; font-size: 0.88rem; box-shadow: 0 14px 34px rgba(0,0,0,0.28); animation: tin .3s ease; }
+  .toast b { color: var(--gold); }
+  @keyframes tin { from { transform: translateY(16px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 980px) {
+    .cat-grid { grid-template-columns: repeat(2, 1fr); }
+    .prod-grid { grid-template-columns: repeat(3, 1fr); }
+    .foot-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 760px) {
+    .nav { grid-template-columns: auto 1fr auto; }
+    .nav-left { display: none; }
+    .burger { display: block; }
+    .logo { text-align: left; font-size: 1.5rem; letter-spacing: 4px; }
+    .hero-inner { grid-template-columns: 1fr; padding: 46px 0 54px; }
+    .hero-visual { height: 320px; order: -1; }
+    .prod-grid { grid-template-columns: repeat(2, 1fr); }
+    .story-inner { grid-template-columns: 1fr; }
+    .story-visual { min-height: 220px; order: -1; }
+    .story-text { padding: 40px 30px; }
+    .values { grid-template-columns: 1fr; }
+    .news-form { flex-direction: column; }
+    .news-form .btn { justify-content: center; }
+  }
+  @media (max-width: 460px) {
+    .prod-grid, .cat-grid { grid-template-columns: 1fr 1fr; gap: 14px; }
+    .foot-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="announce">Türkiye geneli <b>500₺ üzeri ücretsiz kargo</b> · 14 gün içinde kolay iade</div>
+
+<header>
+  <div class="wrap nav">
+    <button class="burger" id="burger" aria-label="Menü">☰</button>
+    <nav class="nav-left">
+      <a href="#urunler">Koleksiyon</a>
+      <a href="#kategoriler">Kategoriler</a>
+      <a href="#hikaye">Hakkımızda</a>
+    </nav>
+    <a href="#" class="logo">LUMAS<small>BUTİK</small></a>
+    <div class="nav-right">
+      <button class="icon-link" id="cartBtn" aria-label="Sepet">🛍️<span class="cart-count hidden" id="cartCount">0</span></button>
+    </div>
+  </div>
+</header>
+
+<!-- ============ HERO ============ -->
+<section class="hero">
+  <div class="wrap hero-inner">
+    <div class="hero-text">
+      <span class="eyebrow">Yeni Sezon · 2026</span>
+      <h1>Zarafetin <em>Yeni</em> Adresi</h1>
+      <p>Özenle seçilmiş kumaşlar, zamansız kesimler. Lumas Butik ile gardırobunuza modern bir dokunuş katın.</p>
+      <div class="hero-cta">
+        <a href="#urunler" class="btn gold">Koleksiyonu Keşfet</a>
+        <a href="#hikaye" class="btn outline">Hikâyemiz</a>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hv-card hv-1"><div class="ph" data-art="1"><span class="mono">L</span></div></div>
+      <div class="hv-card hv-2"><div class="ph" data-art="2"></div></div>
+      <div class="hv-card hv-3"><div class="ph" data-art="3"></div></div>
+      <div class="hero-badge"><b>%100</b>El emeği özen</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CATEGORIES ============ -->
+<section class="block" id="kategoriler">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Keşfet</span>
+      <h2>Kategoriler</h2>
+      <p>İhtiyacınıza göre seçin, tarzınızı tamamlayın.</p>
+    </div>
+    <div class="cat-grid" id="catGrid"></div>
+  </div>
+</section>
+
+<!-- ============ PRODUCTS ============ -->
+<section class="block prod-section" id="urunler">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Vitrin</span>
+      <h2>Öne Çıkan Ürünler</h2>
+      <p>En sevilen parçalarımızı sizin için bir araya getirdik.</p>
+    </div>
+    <div class="tabs" id="tabs"></div>
+    <div class="prod-grid" id="prodGrid"></div>
+  </div>
+</section>
+
+<!-- ============ VALUES ============ -->
+<section class="block" style="padding-top:0">
+  <div class="wrap">
+    <div class="values">
+      <div class="value"><div class="vi">🚚</div><h4>Hızlı Kargo</h4><p>Siparişleriniz aynı gün özenle hazırlanır, kapınıza kadar gelir.</p></div>
+      <div class="value"><div class="vi">↩️</div><h4>Kolay İade</h4><p>14 gün içinde koşulsuz iade hakkı. Beğenmezseniz sorunsuz iade.</p></div>
+      <div class="value"><div class="vi">🔒</div><h4>Güvenli Ödeme</h4><p>Tüm işlemleriniz 256-bit SSL ile korunur.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ STORY ============ -->
+<section class="block" id="hikaye" style="padding-top:0">
+  <div class="wrap">
+    <div class="story">
+      <div class="story-inner">
+        <div class="story-text">
+          <span class="eyebrow">Hikâyemiz</span>
+          <h2>Sadelikte gizli zarafet</h2>
+          <p>Lumas Butik, kadınların günlük hayatına zarafet katmak için doğdu. Her parçayı, kaliteli kumaş ve zamansız tasarım anlayışıyla özenle seçiyoruz.</p>
+          <p>Amacımız; trendlerin ötesinde, yıllarca giyebileceğiniz, kendinizi özel hissettiren bir gardırop yaratmanıza yardımcı olmak.</p>
+          <a href="#urunler" class="btn">Koleksiyonu Gör</a>
+        </div>
+        <div class="story-visual"><div class="ph" data-art="story" style="height:100%"><span class="mono">LUMAS</span></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ NEWSLETTER ============ -->
+<section class="block news" style="padding-top:0">
+  <div class="wrap">
+    <div class="sec-head" style="margin-bottom:0">
+      <span class="eyebrow">Bülten</span>
+      <h2>İlk siz haberdar olun</h2>
+      <p>Yeni koleksiyonlar ve özel indirimlerden ilk siz haberdar olmak için abone olun.</p>
+      <form class="news-form" id="newsForm">
+        <input type="email" placeholder="E-posta adresiniz" required aria-label="E-posta">
+        <button class="btn gold" type="submit">Abone Ol</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <div class="logo">LUMAS<small>BUTİK</small></div>
+        <p>Kadın giyiminde zarif, modern ve özenle seçilmiş parçalar. Zarafetin yeni adresi.</p>
+      </div>
+      <div><h5>Mağaza</h5><ul>
+        <li><a href="#urunler">Yeni Sezon</a></li>
+        <li><a href="#urunler">Öne Çıkanlar</a></li>
+        <li><a href="#kategoriler">Kategoriler</a></li>
+      </ul></div>
+      <div><h5>Yardım</h5><ul>
+        <li><a href="#">Kargo & Teslimat</a></li>
+        <li><a href="#">İade & Değişim</a></li>
+        <li><a href="#">Sıkça Sorulanlar</a></li>
+      </ul></div>
+      <div><h5>İletişim</h5><ul>
+        <li><a href="#">Instagram</a></li>
+        <li><a href="#">WhatsApp</a></li>
+        <li><a href="mailto:merhaba@lumasbutik.com">E-posta</a></li>
+      </ul></div>
+    </div>
+    <div class="foot-bottom">
+      <span>© 2026 Lumas Butik. Tüm hakları saklıdır.</span>
+      <span>Gizlilik · Kullanım Koşulları · <a href="../admin/">Yönetici Paneli</a></span>
+    </div>
+  </div>
+</footer>
+
+<!-- ============ CART DRAWER ============ -->
+<div class="overlay-mask" id="mask"></div>
+<aside class="drawer" id="drawer" aria-label="Sepet">
+  <div class="drawer-head">
+    <h3>Sepetim</h3>
+    <button class="x" id="closeCart" aria-label="Kapat">✕</button>
+  </div>
+  <div class="cart-items" id="cartItems"></div>
+  <div class="drawer-foot" id="drawerFoot"></div>
+</aside>
+
+<div class="toasts" id="toasts"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---- Aynı localStorage'ı yönetici paneliyle paylaşır ---- */
+  const DB_KEY = 'lumas_admin_db_v1';
+  const CART_KEY = 'lumas_cart_v1';
+
+  // Panel yoksa kullanılacak varsayılan (panel tohumuyla birebir aynı)
+  const seed = {
+    settings: { password: 'lumas', storeName: 'Lumas Butik', currency: '₺', lowStock: 5 },
+    categories: [
+      { id: 'c1', name: 'Elbise' }, { id: 'c2', name: 'Üst Giyim' },
+      { id: 'c3', name: 'Alt Giyim' }, { id: 'c4', name: 'Aksesuar' }
+    ],
+    products: [
+      { id: 'p1', name: 'Saten Midi Elbise', category: 'c1', price: 899, stock: 12, sku: 'LMS-EL-001', desc: 'Zarif saten kumaş, günlük ve özel günler için.' },
+      { id: 'p2', name: 'Oversize Triko Kazak', category: 'c2', price: 549, stock: 4, sku: 'LMS-UG-014', desc: 'Yumuşak dokulu, rahat kalıp.' },
+      { id: 'p3', name: 'Yüksek Bel Palazzo Pantolon', category: 'c3', price: 649, stock: 0, sku: 'LMS-AG-022', desc: 'Bol paça, dökümlü kumaş.' },
+      { id: 'p4', name: 'Altın Kaplama Kolye', category: 'c4', price: 299, stock: 20, sku: 'LMS-AK-003', desc: 'Günlük şıklık için minimal tasarım.' }
+    ],
+    orders: []
+  };
+
+  function loadDB() {
+    try {
+      const raw = localStorage.getItem(DB_KEY);
+      if (!raw) return structuredClone(seed);
+      return Object.assign(structuredClone(seed), JSON.parse(raw));
+    } catch (e) { return structuredClone(seed); }
+  }
+  function saveDB(d) { try { localStorage.setItem(DB_KEY, JSON.stringify(d)); } catch (e) {} }
+
+  let db = loadDB();
+  let cart = loadCart();
+
+  function loadCart() { try { return JSON.parse(localStorage.getItem(CART_KEY)) || {}; } catch (e) { return {}; } }
+  function saveCart() { try { localStorage.setItem(CART_KEY, JSON.stringify(cart)); } catch (e) {} }
+
+  const cur = () => (db.settings && db.settings.currency) || '₺';
+  const money = (n) => cur() + Number(n || 0).toLocaleString('tr-TR');
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+  const catName = (id) => (db.categories.find(c => c.id === id) || {}).name || '';
+  const findProd = (id) => db.products.find(p => p.id === id);
+
+  /* ---- Estetik placeholder görseller (duotone degrade) ---- */
+  const palettes = [
+    ['#e7d3bf', '#c9a888'], ['#dcd0e6', '#b6a0cf'], ['#d9e2e0', '#a9c1bd'],
+    ['#f0d9d2', '#d3a29a'], ['#e5ddc9', '#c2b58c'], ['#d5dbe8', '#a7b3cf'],
+    ['#efd8c2', '#d8b48a'], ['#e2d6e0', '#bfa4bd']
+  ];
+  function artStyle(seedStr) {
+    let h = 0; const s = String(seedStr);
+    for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+    const [a, b] = palettes[h % palettes.length];
+    const ang = 120 + (h % 60);
+    return `background:linear-gradient(${ang}deg, ${a}, ${b});`;
+  }
+  function paintArts() {
+    document.querySelectorAll('.ph[data-art]').forEach(el => {
+      el.setAttribute('style', (el.getAttribute('style') || '') + artStyle('hero-' + el.dataset.art));
+    });
+  }
+
+  /* ---- Toast ---- */
+  function toast(html) {
+    const t = document.createElement('div');
+    t.className = 'toast'; t.innerHTML = html;
+    document.getElementById('toasts').appendChild(t);
+    setTimeout(() => { t.style.transition = 'opacity .3s'; t.style.opacity = '0'; }, 2200);
+    setTimeout(() => t.remove(), 2600);
+  }
+
+  /* ---- Kategoriler ---- */
+  function renderCats() {
+    const grid = document.getElementById('catGrid');
+    grid.innerHTML = db.categories.map(c => {
+      const count = db.products.filter(p => p.category === c.id).length;
+      return `<div class="cat-card" data-cat="${c.id}">
+        <div class="ph" style="${artStyle('cat-' + c.id)}height:100%"><span class="mono">${esc(c.name.charAt(0))}</span></div>
+        <div class="cap"><span>${count} ürün</span><b>${esc(c.name)}</b></div>
+      </div>`;
+    }).join('');
+    grid.querySelectorAll('[data-cat]').forEach(el =>
+      el.addEventListener('click', () => { activeCat = el.dataset.cat; renderTabs(); renderProducts(); document.getElementById('urunler').scrollIntoView({ behavior: 'smooth' }); }));
+  }
+
+  /* ---- Ürün sekmeleri ---- */
+  let activeCat = 'all';
+  function renderTabs() {
+    const tabs = [{ id: 'all', name: 'Tümü' }].concat(db.categories);
+    document.getElementById('tabs').innerHTML = tabs.map(t =>
+      `<button class="tab ${activeCat === t.id ? 'active' : ''}" data-tab="${t.id}">${esc(t.name)}</button>`).join('');
+    document.querySelectorAll('[data-tab]').forEach(b =>
+      b.addEventListener('click', () => { activeCat = b.dataset.tab; renderTabs(); renderProducts(); }));
+  }
+
+  /* ---- Ürünler ---- */
+  function renderProducts() {
+    const grid = document.getElementById('prodGrid');
+    const list = db.products.filter(p => activeCat === 'all' || p.category === activeCat);
+    if (!list.length) { grid.innerHTML = `<div class="prod-empty">Bu kategoride henüz ürün yok.</div>`; return; }
+    grid.innerHTML = list.map(p => {
+      const out = Number(p.stock) <= 0;
+      const gold = p.category === 'c4';
+      return `<article class="prod-card">
+        <div class="prod-media">
+          <div class="ph" style="${artStyle(p.id)}"><span class="mono">${esc(p.name.charAt(0))}</span></div>
+          ${out ? `<span class="prod-tag out">Tükendi</span>` : (gold ? `<span class="prod-tag gold">Aksesuar</span>` : '')}
+          <div class="quick-add">
+            <button class="btn gold block sm" data-add="${p.id}" ${out ? 'disabled' : ''}>${out ? 'Tükendi' : 'Sepete Ekle'}</button>
+          </div>
+        </div>
+        <div class="prod-body">
+          <span class="pcat">${esc(catName(p.category))}</span>
+          <span class="pname">${esc(p.name)}</span>
+          <span class="pprice">${money(p.price)}</span>
+        </div>
+      </article>`;
+    }).join('');
+    grid.querySelectorAll('[data-add]').forEach(b =>
+      b.addEventListener('click', () => addToCart(b.dataset.add)));
+  }
+
+  /* ---- Sepet ---- */
+  function cartCount() { return Object.values(cart).reduce((s, q) => s + q, 0); }
+  function addToCart(id) {
+    const p = findProd(id); if (!p || p.stock <= 0) return;
+    const inCart = cart[id] || 0;
+    if (inCart >= p.stock) { toast('Stok sınırına ulaşıldı'); return; }
+    cart[id] = inCart + 1; saveCart(); updateCartUI();
+    toast(`<b>${esc(p.name)}</b> sepete eklendi`);
+  }
+  function setQty(id, q) {
+    const p = findProd(id); if (!p) return;
+    q = Math.max(0, Math.min(q, p.stock));
+    if (q === 0) delete cart[id]; else cart[id] = q;
+    saveCart(); updateCartUI();
+  }
+  function cartTotal() {
+    return Object.entries(cart).reduce((s, [id, q]) => {
+      const p = findProd(id); return s + (p ? p.price * q : 0);
+    }, 0);
+  }
+  function updateCartUI() {
+    const n = cartCount();
+    const badge = document.getElementById('cartCount');
+    badge.textContent = n; badge.classList.toggle('hidden', n === 0);
+
+    const items = document.getElementById('cartItems');
+    const entries = Object.entries(cart).filter(([id]) => findProd(id));
+    if (!entries.length) {
+      items.innerHTML = `<div class="cart-empty"><div class="big">🛍️</div>Sepetiniz henüz boş.<br>Koleksiyonu keşfetmeye ne dersiniz?</div>`;
+      document.getElementById('drawerFoot').innerHTML = `<a href="#urunler" class="btn block" id="keepShop">Alışverişe Başla</a>`;
+      document.getElementById('keepShop').addEventListener('click', closeCart);
+      return;
+    }
+    items.innerHTML = entries.map(([id, q]) => {
+      const p = findProd(id);
+      return `<div class="ci">
+        <div class="ci-media"><div class="ph" style="${artStyle(p.id)}"><span class="mono">${esc(p.name.charAt(0))}</span></div></div>
+        <div class="ci-info">
+          <div class="n">${esc(p.name)}</div>
+          <div class="p">${money(p.price)}</div>
+          <div class="qty"><button data-dec="${id}">−</button><span>${q}</span><button data-inc="${id}">+</button></div>
+          <button class="ci-rem" data-rem="${id}">Kaldır</button>
+        </div>
+        <div class="price serif" style="font-weight:600">${money(p.price * q)}</div>
+      </div>`;
+    }).join('');
+    items.querySelectorAll('[data-inc]').forEach(b => b.addEventListener('click', () => setQty(b.dataset.inc, (cart[b.dataset.inc] || 0) + 1)));
+    items.querySelectorAll('[data-dec]').forEach(b => b.addEventListener('click', () => setQty(b.dataset.dec, (cart[b.dataset.dec] || 0) - 1)));
+    items.querySelectorAll('[data-rem]').forEach(b => b.addEventListener('click', () => setQty(b.dataset.rem, 0)));
+
+    document.getElementById('drawerFoot').innerHTML = `
+      <div class="cart-total"><span class="lbl">Ara Toplam</span><span class="amt">${money(cartTotal())}</span></div>
+      <button class="btn gold block" id="checkoutBtn">Siparişi Tamamla</button>`;
+    document.getElementById('checkoutBtn').addEventListener('click', openCheckout);
+  }
+
+  /* ---- Sepet çekmecesi aç/kapa ---- */
+  const mask = document.getElementById('mask');
+  const drawer = document.getElementById('drawer');
+  function openCart() { drawer.classList.add('show'); mask.classList.add('show'); }
+  function closeCart() { drawer.classList.remove('show'); mask.classList.remove('show'); }
+  document.getElementById('cartBtn').addEventListener('click', openCart);
+  document.getElementById('closeCart').addEventListener('click', closeCart);
+  mask.addEventListener('click', closeCart);
+
+  /* ---- Ödeme / Sipariş ---- */
+  function openCheckout() {
+    const total = cartTotal();
+    const shipping = total >= 500 ? 0 : 49.9;
+    const lines = Object.entries(cart).filter(([id]) => findProd(id));
+    const modal = document.createElement('div');
+    modal.className = 'modal-mask';
+    modal.innerHTML = `
+      <div class="modal">
+        <div class="modal-head"><h3>Siparişi Tamamla</h3><p>Bilgilerinizi girin, siparişinizi oluşturalım.</p></div>
+        <div class="modal-body">
+          <div class="order-sum">
+            ${lines.map(([id, q]) => { const p = findProd(id); return `<div class="row"><span>${esc(p.name)} × ${q}</span><span>${money(p.price * q)}</span></div>`; }).join('')}
+            <div class="row"><span>Kargo</span><span>${shipping === 0 ? 'Ücretsiz' : money(shipping)}</span></div>
+            <div class="row tot"><span>Toplam</span><span>${money(total + shipping)}</span></div>
+          </div>
+          <div class="fld"><label>Ad Soyad</label><input id="ck_name" placeholder="Adınız Soyadınız"></div>
+          <div class="fld"><label>Telefon</label><input id="ck_phone" placeholder="05xx xxx xx xx"></div>
+          <div class="fld"><label>Teslimat Adresi</label><textarea id="ck_addr" rows="2" placeholder="Mahalle, cadde, no, ilçe/il"></textarea></div>
+          <button class="btn gold block" id="placeOrder">Siparişi Onayla · ${money(total + shipping)}</button>
+          <button class="btn outline block" id="cancelCk" style="margin-top:10px">Vazgeç</button>
+        </div>
+      </div>`;
+    document.body.appendChild(modal);
+    const close = () => modal.remove();
+    modal.addEventListener('click', e => { if (e.target === modal) close(); });
+    modal.querySelector('#cancelCk').addEventListener('click', close);
+    modal.querySelector('#placeOrder').addEventListener('click', () => {
+      const name = modal.querySelector('#ck_name').value.trim();
+      if (!name) { toast('Lütfen ad soyad girin'); modal.querySelector('#ck_name').focus(); return; }
+      placeOrder(name, total + shipping, lines);
+      close();
+    });
+    setTimeout(() => modal.querySelector('#ck_name').focus(), 50);
+  }
+
+  function todayStr() {
+    // Deterministik değil; sipariş anını yaklaşık gösterir
+    const d = new Date();
+    const p = (x) => String(x).padStart(2, '0');
+    return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+  }
+
+  function placeOrder(name, grandTotal, lines) {
+    // Panelin güncel verisini tekrar oku (başka sekmede değişmiş olabilir)
+    db = loadDB();
+    const itemCount = lines.reduce((s, [, q]) => s + q, 0);
+    const order = {
+      id: 'o' + Date.now().toString(36),
+      customer: name,
+      total: Math.round(grandTotal * 100) / 100,
+      status: 'pending',
+      date: todayStr(),
+      items: itemCount
+    };
+    // stok düş
+    lines.forEach(([id, q]) => {
+      const p = db.products.find(x => x.id === id);
+      if (p) p.stock = Math.max(0, Number(p.stock) - q);
+    });
+    db.orders = db.orders || [];
+    db.orders.push(order);
+    saveDB(db);
+
+    // sepeti temizle
+    cart = {}; saveCart();
+    renderProducts(); updateCartUI(); closeCart();
+    showSuccess(order);
+  }
+
+  function showSuccess(order) {
+    const modal = document.createElement('div');
+    modal.className = 'modal-mask';
+    modal.innerHTML = `
+      <div class="modal"><div class="success">
+        <div class="ok">✓</div>
+        <h3>Siparişiniz Alındı!</h3>
+        <p>Teşekkürler ${esc(order.customer)}. Sipariş no: <b>#${esc(order.id.toUpperCase())}</b><br>Toplam: <b>${money(order.total)}</b></p>
+        <button class="btn gold" id="okDone">Alışverişe Devam Et</button>
+      </div></div>`;
+    document.body.appendChild(modal);
+    modal.querySelector('#okDone').addEventListener('click', () => modal.remove());
+    modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+  }
+
+  /* ---- Bülten ---- */
+  document.getElementById('newsForm').addEventListener('submit', e => {
+    e.preventDefault(); e.target.reset(); toast('Bültene abone oldunuz, teşekkürler!');
+  });
+
+  /* ---- Mobil menü (basit: kategorilere kaydır) ---- */
+  document.getElementById('burger').addEventListener('click', () => {
+    document.getElementById('kategoriler').scrollIntoView({ behavior: 'smooth' });
+  });
+
+  /* ---- Başlat ---- */
+  paintArts();
+  renderCats();
+  renderTabs();
+  renderProducts();
+  updateCartUI();
+
+  // Başka sekmede (ör. yönetici paneli) veri değişirse tazele
+  window.addEventListener('storage', e => {
+    if (e.key === DB_KEY) { db = loadDB(); renderCats(); renderTabs(); renderProducts(); updateCartUI(); }
+  });
+})();
+</script>
+</body>
+</html>
