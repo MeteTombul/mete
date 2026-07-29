@@ -347,7 +347,16 @@ def authorize(platform):
         msg = get_uploader(platform, SECRETS_DIR).authorize()
     except Exception as e:  # noqa: BLE001
         msg = f"Hata: {e}"
-    return f"<p>{msg}</p><a href='{url_for('index')}'>← geri</a>"
+    extra = ""
+    if platform == "tiktok":
+        extra = (
+            f" &nbsp;|&nbsp; <a href='{url_for('tiktok_setup')}'>"
+            "TikTok anahtarlarını formdan gir →</a>"
+        )
+    return (
+        f"<div style='font-family:system-ui;max-width:640px;margin:24px auto;padding:0 16px'>"
+        f"<p>{msg}</p><a href='{url_for('index')}'>← geri</a>{extra}</div>"
+    )
 
 
 @app.route("/clips")
