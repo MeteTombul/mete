@@ -57,6 +57,15 @@ def main(argv: list[str] | None = None) -> int:
                    help="Çıktı formatı (vars. 9:16)")
     p.add_argument("--reframe", action="store_true",
                    help="Yüz tespitiyle özneye ortalanmış akıllı kırpma (bulanık arka plan yerine)")
+    p.add_argument(
+        "--translate", choices=["tr", "en"], default=None,
+        help="Altyazıyı bu dile çevir: tr (Türkçe) veya en (İngilizce). "
+             "Belirtilmezse videonun kendi dili (otomatik algılanır) kullanılır.",
+    )
+    p.add_argument(
+        "--include-music", action="store_true",
+        help="En çok izlenenleri seçerken müzik videolarını da dâhil et (varsayılan: elenir)",
+    )
     p.add_argument("--no-karaoke", action="store_true", help="Kelime kelime karaoke altyazıyı kapat")
     p.add_argument("--no-scenes", action="store_true", help="Sahne kesimi hizalamayı kapat")
     p.add_argument("--no-progress-bar", action="store_true", help="İlerleme çubuğunu kapat")
@@ -127,6 +136,8 @@ def main(argv: list[str] | None = None) -> int:
     opts = RenderOptions(
         aspect=args.aspect,
         reframe=args.reframe,
+        translate_to=args.translate,
+        skip_music=not args.include_music,
         karaoke=not args.no_karaoke,
         progress_bar=not args.no_progress_bar,
         loudnorm=not args.no_loudnorm,

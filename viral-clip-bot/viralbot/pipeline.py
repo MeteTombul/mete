@@ -63,10 +63,23 @@ def _process_video(
     src = download_mod.download_video(video.url, work)
     duration = effects_mod.probe_duration(src)
 
-    log(f"{tag} Altyazıya çevriliyor (Whisper)...")
+    log(f"{tag} Altyazıya çevriliyor (Whisper, dil otomatik)...")
     transcript = transcribe_mod.transcribe(
-        src, model_size=whisper_model, device=whisper_device, language="tr"
+        src, model_size=whisper_model, device=whisper_device, language=None
     )
+    log(f"{tag} Algılanan dil: {transcript.language}")
+
+    # İstenirse altyazıyı hedef dile çevir (zaman damgaları korunur)
+    if opts.translate_to and transcript.language != opts.translate_to:
+        log(f"{tag} Altyazı '{opts.translate_to}' diline çevriliyor (Claude)...")
+        try:
+            texts = [s.text for s in transcript.segments]
+            translated = claude_client.translate_segments(texts, opts.translate_to)
+            for seg, tr in zip(transcript.segments, translated):
+                seg.text = tr
+                seg.words = []  # çeviri sonrası kelime zamanlamaları geçersiz → segment altyazı
+        except Exception as e:  # noqa: BLE001
+            log(f"{tag} ! Çeviri başarısız, orijinal dil kullanılacak: {e}")
 
     cuts: list[float] = []
     if use_scenes:
@@ -216,7 +229,9 @@ def run(
 
     if videos is None:
         safe_log(f"[1/5] Kanal taranıyor: {channel_url}")
-        videos = channel_mod.list_top_videos(channel_url, limit=top_videos)
+        videos = channel_mod.list_top_videos(
+            channel_url, limit=top_videos, skip_music=opts.skip_music, log=safe_log
+        )
     if not videos:
         safe_log("Hiç video bulunamadı. URL'yi kontrol edin.")
         return []

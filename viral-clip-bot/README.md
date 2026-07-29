@@ -93,7 +93,10 @@ python -m viralbot "https://www.youtube.com/@KANAL" \
   --clip-max 60 \         # klip üst süre (sn)
   --workers 2 \           # paralel video işleme
   --whisper-model small \ # tiny/base/small/medium/large-v3
-  --whisper-device cpu    # cpu veya cuda (GPU varsa çok daha hızlı)
+  --whisper-device cpu \  # cpu veya cuda (GPU varsa çok daha hızlı)
+  --translate tr \        # altyazıyı Türkçe'ye çevir (tr) veya İngilizce'ye (en)
+                          #   verilmezse videonun kendi dili otomatik algılanır
+  --include-music         # müzik videolarını da dâhil et (varsayılan: elenir)
 
 # Biçim ve efektler
   --aspect 9:16 \         # 9:16 | 1:1 | 16:9

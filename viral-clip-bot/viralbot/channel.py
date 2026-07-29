@@ -25,10 +25,46 @@ def _normalize_channel_url(channel_url: str) -> str:
     return url + "/videos"
 
 
-def list_top_videos(channel_url: str, limit: int = 5) -> list[Video]:
+def _is_music(info: dict) -> bool:
+    """Video bir müzik/şarkı içeriği mi? (kategori veya sanatçı/parça bilgisine göre)."""
+    cats = info.get("categories") or []
+    if any(c and str(c).lower() == "music" for c in cats):
+        return True
+    # YouTube Music otomatik videolarında bu alanlar dolu olur
+    if info.get("track") or info.get("artist"):
+        return True
+    return False
+
+
+def _filter_music(videos: list[Video], limit: int, log=None) -> list[Video]:
+    """Videoların tam meta verisine bakıp müzikleri eler, ilk `limit` müzik-dışını döndürür."""
+    probe_opts = {"quiet": True, "no_warnings": True, "no_color": True, "skip_download": True}
+    selected: list[Video] = []
+    with YoutubeDL(probe_opts) as ydl:
+        # Gereğinden fazla sorgu yapmamak için makul bir tavan (limit x 5)
+        for v in videos[: max(limit * 5, limit)]:
+            if len(selected) >= limit:
+                break
+            try:
+                info = ydl.extract_info(v.url, download=False)
+            except Exception:  # noqa: BLE001
+                continue
+            if _is_music(info):
+                if log:
+                    log(f"    ♪ Müzik atlandı: {v.title}")
+                continue
+            selected.append(v)
+    return selected
+
+
+def list_top_videos(
+    channel_url: str, limit: int = 5, skip_music: bool = True, log=None
+) -> list[Video]:
     """Kanaldaki videoları izlenme sayısına göre azalan sıralar, ilk `limit` tanesini döndürür.
 
     `extract_flat` ile videolar hızlıca (tek tek indirmeden) taranır.
+    skip_music=True ise müzik/şarkı videoları elenir (bu adım her aday için
+    kısa bir meta sorgusu yapar, biraz daha yavaştır).
     """
     videos_url = _normalize_channel_url(channel_url)
 
@@ -65,6 +101,9 @@ def list_top_videos(channel_url: str, limit: int = 5) -> list[Video]:
 
     # extract_flat bazı kanallarda view_count vermez; o zaman sıralama liste sırasını korur
     videos.sort(key=lambda v: v.view_count, reverse=True)
+
+    if skip_music:
+        return _filter_music(videos, limit, log=log)
     return videos[:limit]
 
 

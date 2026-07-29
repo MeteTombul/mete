@@ -12,6 +12,10 @@ class RenderOptions:
     aspect: str = "9:16"          # "9:16" | "1:1" | "16:9"
     fade: float = 0.5             # baş/son fade süresi (sn)
 
+    # Dil / altyazı
+    translate_to: str | None = None  # None: videonun dili (otomatik). "tr"/"en": o dile çevir
+    skip_music: bool = True          # en çok izlenenleri seçerken müzik videolarını ele
+
     # Altyazı
     karaoke: bool = True          # kelime kelime vurgulu altyazı
     sub_color: str = "&H00FFFFFF"  # ASS BGR: beyaz

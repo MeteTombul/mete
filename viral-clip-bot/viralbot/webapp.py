@@ -93,11 +93,21 @@ INDEX_HTML = """
    <select name="aspect"><option>9:16</option><option>1:1</option><option>16:9</option></select>
   </div>
  </div>
- <label>Whisper modeli</label>
- <select name="whisper_model">
-   <option>tiny</option><option>base</option><option selected>small</option>
-   <option>medium</option><option>large-v3</option>
- </select>
+ <div class="row">
+  <div><label>Whisper modeli</label>
+   <select name="whisper_model">
+     <option>tiny</option><option>base</option><option selected>small</option>
+     <option>medium</option><option>large-v3</option>
+   </select>
+  </div>
+  <div><label>Altyazı dili</label>
+   <select name="translate">
+     <option value="">Videonun dili (otomatik)</option>
+     <option value="tr">Türkçe'ye çevir</option>
+     <option value="en">İngilizce'ye çevir</option>
+   </select>
+  </div>
+ </div>
  <label>Efektler</label>
  <div>
   <label class="chk"><input type="checkbox" name="karaoke" checked>Karaoke altyazı</label>
@@ -106,6 +116,7 @@ INDEX_HTML = """
   <label class="chk"><input type="checkbox" name="progress_bar" checked>İlerleme çubuğu</label>
   <label class="chk"><input type="checkbox" name="thumbnail" checked>Kapak</label>
   <label class="chk"><input type="checkbox" name="metadata" checked>SEO metası</label>
+  <label class="chk"><input type="checkbox" name="skip_music" checked>Müzikleri atla</label>
  </div>
  <label>Otomatik yükle</label>
  <div>
@@ -195,6 +206,8 @@ def start():
     opts = RenderOptions(
         aspect=f.get("aspect", "9:16"),
         reframe=bool(f.get("reframe")),
+        translate_to=(f.get("translate") or None),
+        skip_music=bool(f.get("skip_music")),
         karaoke=bool(f.get("karaoke")),
         progress_bar=bool(f.get("progress_bar")),
         make_thumbnail=bool(f.get("thumbnail")),

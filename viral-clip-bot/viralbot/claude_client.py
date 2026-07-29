@@ -165,3 +165,45 @@ def generate_metadata(clip_transcript: str, moment_title: str) -> dict:
     )
     text = next((b.text for b in resp.content if b.type == "text"), "{}")
     return json.loads(text)
+
+
+_LANG_NAMES = {"tr": "Türkçe", "en": "İngilizce"}
+
+
+def translate_segments(texts: list[str], target: str) -> list[str]:
+    """Altyazı segmentlerini hedef dile çevirir (sıra ve sayı korunur).
+
+    target: "tr" (Türkçe) veya "en" (İngilizce).
+    """
+    if not texts:
+        return []
+    lang_name = _LANG_NAMES.get(target, target)
+    client = _client()
+
+    schema = {
+        "type": "object",
+        "properties": {
+            "translations": {"type": "array", "items": {"type": "string"}},
+        },
+        "required": ["translations"],
+        "additionalProperties": False,
+    }
+    numbered = "\n".join(f"{i}\t{t}" for i, t in enumerate(texts))
+    resp = client.messages.create(
+        model=MODEL,
+        max_tokens=8000,
+        system=(
+            f"Sen bir altyazı çevirmenisin. Sana numaralı altyazı satırları verilecek. "
+            f"Her satırı {lang_name} diline, doğal ve akıcı biçimde çevir. "
+            "Satır sayısını ve sırasını KORU; her giriş için tam bir çeviri döndür. "
+            "Konuşma dilini koru, aşırı resmileştirme."
+        ),
+        messages=[{"role": "user", "content": numbered}],
+        output_config={"format": {"type": "json_schema", "schema": schema}},
+    )
+    data = json.loads(next((b.text for b in resp.content if b.type == "text"), "{}"))
+    out = data.get("translations", [])
+    # Güvenlik: sayı uyuşmazsa orijinali koru/tamamla
+    if len(out) < len(texts):
+        out = out + texts[len(out):]
+    return out[: len(texts)]
