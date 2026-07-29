@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lumas Butik · Yönetici Paneli</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --bg-soft: #1e293b;
+    --panel: #131c31;
+    --panel-2: #182238;
+    --border: #27324a;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --muted-2: #64748b;
+    --accent: #38bdf8;
+    --accent-2: #a78bfa;
+    --green: #4ade80;
+    --amber: #fbbf24;
+    --red: #f87171;
+    --grad: linear-gradient(90deg, #38bdf8, #a78bfa);
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: radial-gradient(circle at 50% -10%, #1e293b, #0f172a);
+    color: var(--text);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; text-decoration: none; }
+  button, input, select, textarea { font-family: inherit; }
+  .hidden { display: none !important; }
+
+  /* ---------- Login ---------- */
+  .login-wrap {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .login-card {
+    width: min(92vw, 380px);
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 34px 30px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+    text-align: center;
+  }
+  .brand {
+    font-size: 1.7rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+    background: var(--grad);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .brand-sub { color: var(--muted); font-size: 0.85rem; margin-top: 4px; letter-spacing: 3px; text-transform: uppercase; }
+  .login-card h2 { font-size: 1.1rem; margin: 26px 0 18px; font-weight: 600; }
+  .field { text-align: left; margin-bottom: 16px; }
+  .field label { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 6px; }
+  .input {
+    width: 100%;
+    padding: 12px 14px;
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(56,189,248,0.15); }
+  textarea.input { resize: vertical; min-height: 84px; }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 11px 20px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #0f172a;
+    background: var(--grad);
+    border: none;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.2s, opacity 0.15s;
+    box-shadow: 0 6px 20px rgba(56,189,248,0.3);
+  }
+  .btn:hover { transform: translateY(-1px); box-shadow: 0 10px 26px rgba(56,189,248,0.45); }
+  .btn:active { transform: translateY(0); }
+  .btn.full { width: 100%; }
+  .btn.ghost {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+    box-shadow: none;
+  }
+  .btn.ghost:hover { border-color: var(--accent); box-shadow: none; }
+  .btn.danger { background: linear-gradient(90deg,#fb7185,#f87171); color: #450a0a; box-shadow: 0 6px 20px rgba(248,113,113,0.3); }
+  .btn.sm { padding: 7px 13px; font-size: 0.82rem; }
+  .login-err { color: var(--red); font-size: 0.85rem; min-height: 20px; margin-bottom: 8px; }
+  .login-hint { color: var(--muted-2); font-size: 0.78rem; margin-top: 16px; }
+
+  /* ---------- App layout ---------- */
+  .app { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
+  .sidebar {
+    background: var(--panel);
+    border-right: 1px solid var(--border);
+    padding: 22px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+  }
+  .sidebar .brand { font-size: 1.35rem; }
+  .sidebar .brand-sub { margin-bottom: 22px; }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 14px;
+    border-radius: 10px;
+    color: var(--muted);
+    font-weight: 600;
+    font-size: 0.92rem;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+  .nav-item .ic { width: 20px; text-align: center; font-size: 1.05rem; }
+  .nav-item:hover { background: var(--panel-2); color: var(--text); }
+  .nav-item.active { background: var(--panel-2); color: var(--text); box-shadow: inset 3px 0 0 var(--accent); }
+  .nav-spacer { flex: 1; }
+  .logout {
+    display: flex; align-items: center; gap: 12px;
+    padding: 11px 14px; border-radius: 10px;
+    color: var(--muted); font-weight: 600; font-size: 0.9rem; cursor: pointer;
+  }
+  .logout:hover { background: var(--panel-2); color: var(--red); }
+
+  .main { padding: 26px 30px 60px; overflow-x: hidden; }
+  .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 26px; gap: 16px; flex-wrap: wrap; }
+  .topbar h1 { font-size: 1.5rem; font-weight: 700; }
+  .topbar .sub { color: var(--muted); font-size: 0.85rem; margin-top: 2px; }
+  .topbar-actions { display: flex; gap: 10px; align-items: center; }
+
+  /* ---------- Cards / stats ---------- */
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 26px; }
+  .stat {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+  }
+  .stat .label { color: var(--muted); font-size: 0.82rem; display: flex; align-items: center; gap: 8px; }
+  .stat .value { font-size: 1.9rem; font-weight: 800; margin-top: 8px; }
+  .stat .value.accent { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 22px;
+  }
+  .card h3 { font-size: 1.05rem; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+
+  /* ---------- Toolbar ---------- */
+  .toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
+  .search { flex: 1; min-width: 180px; position: relative; }
+  .search input { padding-left: 38px; }
+  .search .si { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--muted-2); }
+  .select { max-width: 200px; }
+
+  /* ---------- Table ---------- */
+  .table-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid var(--border); }
+  table { width: 100%; border-collapse: collapse; min-width: 620px; }
+  th, td { text-align: left; padding: 13px 16px; font-size: 0.9rem; }
+  thead th { background: var(--panel-2); color: var(--muted); font-weight: 600; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
+  tbody tr { border-top: 1px solid var(--border); transition: background 0.12s; }
+  tbody tr:hover { background: var(--panel-2); }
+  td .thumb { width: 42px; height: 42px; border-radius: 8px; object-fit: cover; background: var(--bg-soft); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+  .prod-cell { display: flex; align-items: center; gap: 12px; }
+  .prod-cell .pn { font-weight: 600; }
+  .prod-cell .pc { color: var(--muted-2); font-size: 0.78rem; }
+  .price { font-weight: 700; }
+  .row-actions { display: flex; gap: 6px; justify-content: flex-end; }
+  .icon-btn {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: var(--bg-soft); border: 1px solid var(--border);
+    color: var(--muted); cursor: pointer; font-size: 0.9rem;
+    display: inline-flex; align-items: center; justify-content: center;
+    transition: color 0.12s, border-color 0.12s;
+  }
+  .icon-btn:hover { color: var(--accent); border-color: var(--accent); }
+  .icon-btn.del:hover { color: var(--red); border-color: var(--red); }
+
+  .badge { padding: 4px 10px; border-radius: 999px; font-size: 0.75rem; font-weight: 700; display: inline-block; white-space: nowrap; }
+  .badge.ok { background: rgba(74,222,128,0.15); color: var(--green); }
+  .badge.low { background: rgba(251,191,36,0.15); color: var(--amber); }
+  .badge.out { background: rgba(248,113,113,0.15); color: var(--red); }
+  .badge.cat { background: rgba(167,139,250,0.15); color: var(--accent-2); }
+  .badge.pending { background: rgba(251,191,36,0.15); color: var(--amber); }
+  .badge.shipped { background: rgba(56,189,248,0.15); color: var(--accent); }
+  .badge.done { background: rgba(74,222,128,0.15); color: var(--green); }
+  .badge.cancel { background: rgba(248,113,113,0.15); color: var(--red); }
+
+  .empty { text-align: center; padding: 46px 20px; color: var(--muted-2); }
+  .empty .big { font-size: 2.4rem; margin-bottom: 10px; }
+
+  /* ---------- Modal ---------- */
+  .modal-back {
+    position: fixed; inset: 0; background: rgba(8,12,22,0.72);
+    backdrop-filter: blur(4px);
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px; z-index: 50;
+  }
+  .modal {
+    width: min(94vw, 520px);
+    max-height: 92vh; overflow-y: auto;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 24px;
+    box-shadow: 0 30px 90px rgba(0,0,0,0.6);
+  }
+  .modal h3 { font-size: 1.2rem; margin-bottom: 18px; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .form-grid .full { grid-column: 1 / -1; }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 22px; }
+
+  /* ---------- Toast ---------- */
+  .toast-wrap { position: fixed; bottom: 22px; right: 22px; display: flex; flex-direction: column; gap: 10px; z-index: 80; }
+  .toast {
+    background: var(--panel-2); border: 1px solid var(--border);
+    border-left: 3px solid var(--green);
+    padding: 12px 18px; border-radius: 10px; font-size: 0.9rem;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+    animation: toastIn 0.25s ease-out;
+  }
+  .toast.err { border-left-color: var(--red); }
+  @keyframes toastIn { from { transform: translateX(30px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+  /* ---------- Mobile ---------- */
+  .menu-toggle { display: none; }
+  @media (max-width: 860px) {
+    .app { grid-template-columns: 1fr; }
+    .sidebar {
+      position: fixed; z-index: 40; width: 240px; left: 0; top: 0;
+      transform: translateX(-100%); transition: transform 0.22s ease;
+    }
+    .sidebar.open { transform: translateX(0); }
+    .menu-toggle { display: inline-flex; }
+    .form-grid { grid-template-columns: 1fr; }
+    .main { padding: 18px 16px 60px; }
+    .scrim { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 35; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN ============ -->
+<div class="login-wrap" id="loginView">
+  <div class="login-card">
+    <div class="brand">LUMAS</div>
+    <div class="brand-sub">Butik · Yönetim</div>
+    <h2>Yönetici Girişi</h2>
+    <div class="field">
+      <label for="pw">Parola</label>
+      <input class="input" type="password" id="pw" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <div class="login-err" id="loginErr"></div>
+    <button class="btn full" id="loginBtn">Giriş Yap</button>
+    <div class="login-hint">İlk giriş parolası: <b>lumas</b> — girişten sonra Ayarlar'dan değiştirebilirsin.</div>
+  </div>
+</div>
+
+<!-- ============ APP ============ -->
+<div class="app hidden" id="appView">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">LUMAS</div>
+    <div class="brand-sub">Butik · Yönetim</div>
+    <div class="nav-item active" data-page="dashboard"><span class="ic">📊</span> Panel</div>
+    <div class="nav-item" data-page="products"><span class="ic">👗</span> Ürünler</div>
+    <div class="nav-item" data-page="orders"><span class="ic">🛍️</span> Siparişler</div>
+    <div class="nav-item" data-page="categories"><span class="ic">🏷️</span> Kategoriler</div>
+    <div class="nav-item" data-page="settings"><span class="ic">⚙️</span> Ayarlar</div>
+    <div class="nav-spacer"></div>
+    <div class="logout" id="logoutBtn"><span class="ic">🚪</span> Çıkış Yap</div>
+  </aside>
+  <div class="scrim hidden" id="scrim"></div>
+
+  <main class="main">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button class="icon-btn menu-toggle" id="menuToggle">☰</button>
+        <div>
+          <h1 id="pageTitle">Panel</h1>
+          <div class="sub" id="pageSub">Genel bakış</div>
+        </div>
+      </div>
+      <div class="topbar-actions" id="topbarActions"></div>
+    </div>
+    <div id="pageContent"></div>
+  </main>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* =========================================================
+     Basit veri katmanı (localStorage) — sonradan gerçek
+     bir sunucu/API'ye taşınabilir.
+  ========================================================= */
+  const DB_KEY = 'lumas_admin_db_v1';
+  const AUTH_KEY = 'lumas_admin_session';
+
+  const seed = {
+    settings: {
+      password: 'lumas',
+      storeName: 'Lumas Butik',
+      currency: '₺',
+      lowStock: 5
+    },
+    categories: [
+      { id: 'c1', name: 'Elbise' },
+      { id: 'c2', name: 'Üst Giyim' },
+      { id: 'c3', name: 'Alt Giyim' },
+      { id: 'c4', name: 'Aksesuar' }
+    ],
+    products: [
+      { id: 'p1', name: 'Saten Midi Elbise', category: 'c1', price: 899, stock: 12, sku: 'LMS-EL-001', desc: 'Zarif saten kumaş, günlük ve özel günler için.' },
+      { id: 'p2', name: 'Oversize Triko Kazak', category: 'c2', price: 549, stock: 4, sku: 'LMS-UG-014', desc: 'Yumuşak dokulu, rahat kalıp.' },
+      { id: 'p3', name: 'Yüksek Bel Palazzo Pantolon', category: 'c3', price: 649, stock: 0, sku: 'LMS-AG-022', desc: 'Bol paça, dökümlü kumaş.' },
+      { id: 'p4', name: 'Altın Kaplama Kolye', category: 'c4', price: 299, stock: 20, sku: 'LMS-AK-003', desc: 'Günlük şıklık için minimal tasarım.' }
+    ],
+    orders: [
+      { id: 'o1', customer: 'Ayşe Yılmaz', total: 899, status: 'pending', date: '2026-07-28', items: 1 },
+      { id: 'o2', customer: 'Zeynep Kaya', total: 848, status: 'shipped', date: '2026-07-27', items: 2 },
+      { id: 'o3', customer: 'Elif Demir', total: 299, status: 'done', date: '2026-07-25', items: 1 }
+    ]
+  };
+
+  function load() {
+    try {
+      const raw = localStorage.getItem(DB_KEY);
+      if (!raw) { save(seed); return structuredClone(seed); }
+      const data = JSON.parse(raw);
+      // eksik alanları tohumla tamamla
+      return Object.assign(structuredClone(seed), data);
+    } catch (e) {
+      return structuredClone(seed);
+    }
+  }
+  function save(d) { localStorage.setItem(DB_KEY, JSON.stringify(d || db)); }
+  let db = load();
+
+  const uid = (p) => p + Date.now().toString(36) + Math.floor(performance.now() % 1000).toString(36);
+  const money = (n) => db.settings.currency + Number(n || 0).toLocaleString('tr-TR');
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+  const catName = (id) => (db.categories.find(c => c.id === id) || {}).name || '—';
+
+  /* ---------------- Toast ---------------- */
+  function toast(msg, err) {
+    const el = document.createElement('div');
+    el.className = 'toast' + (err ? ' err' : '');
+    el.textContent = msg;
+    document.getElementById('toastWrap').appendChild(el);
+    setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity .3s'; }, 2400);
+    setTimeout(() => el.remove(), 2800);
+  }
+
+  /* ---------------- Auth ---------------- */
+  const loginView = document.getElementById('loginView');
+  const appView = document.getElementById('appView');
+  const pw = document.getElementById('pw');
+  const loginErr = document.getElementById('loginErr');
+
+  function doLogin() {
+    if (pw.value === db.settings.password) {
+      sessionStorage.setItem(AUTH_KEY, '1');
+      loginErr.textContent = '';
+      pw.value = '';
+      showApp();
+    } else {
+      loginErr.textContent = 'Parola hatalı. Tekrar deneyin.';
+      pw.value = '';
+      pw.focus();
+    }
+  }
+  document.getElementById('loginBtn').addEventListener('click', doLogin);
+  pw.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    sessionStorage.removeItem(AUTH_KEY);
+    appView.classList.add('hidden');
+    loginView.classList.remove('hidden');
+    pw.focus();
+  });
+
+  function showApp() {
+    loginView.classList.add('hidden');
+    appView.classList.remove('hidden');
+    navigate('dashboard');
+  }
+
+  /* ---------------- Navigation ---------------- */
+  const pages = {};
+  const titles = {
+    dashboard: ['Panel', 'Genel bakış'],
+    products: ['Ürünler', 'Ürün kataloğunu yönet'],
+    orders: ['Siparişler', 'Gelen siparişleri takip et'],
+    categories: ['Kategoriler', 'Ürün kategorilerini düzenle'],
+    settings: ['Ayarlar', 'Mağaza ayarları']
+  };
+  let current = 'dashboard';
+
+  function navigate(page) {
+    current = page;
+    document.querySelectorAll('.nav-item').forEach(n =>
+      n.classList.toggle('active', n.dataset.page === page));
+    document.getElementById('pageTitle').textContent = titles[page][0];
+    document.getElementById('pageSub').textContent = titles[page][1];
+    document.getElementById('topbarActions').innerHTML = '';
+    document.getElementById('pageContent').innerHTML = '';
+    pages[page]();
+    closeSidebar();
+  }
+  document.querySelectorAll('.nav-item').forEach(n =>
+    n.addEventListener('click', () => navigate(n.dataset.page)));
+
+  // mobil menü
+  const sidebar = document.getElementById('sidebar');
+  const scrim = document.getElementById('scrim');
+  function openSidebar() { sidebar.classList.add('open'); scrim.classList.remove('hidden'); }
+  function closeSidebar() { sidebar.classList.remove('open'); scrim.classList.add('hidden'); }
+  document.getElementById('menuToggle').addEventListener('click', openSidebar);
+  scrim.addEventListener('click', closeSidebar);
+
+  /* =========================================================
+     PANEL (Dashboard)
+  ========================================================= */
+  pages.dashboard = function () {
+    const totalStock = db.products.reduce((s, p) => s + Number(p.stock || 0), 0);
+    const revenue = db.orders.filter(o => o.status !== 'cancel').reduce((s, o) => s + Number(o.total || 0), 0);
+    const pending = db.orders.filter(o => o.status === 'pending').length;
+    const low = db.products.filter(p => p.stock > 0 && p.stock <= db.settings.lowStock).length;
+    const out = db.products.filter(p => Number(p.stock) === 0).length;
+
+    const c = document.getElementById('pageContent');
+    c.innerHTML = `
+      <div class="stat-grid">
+        <div class="stat"><div class="label">🛍️ Toplam Ürün</div><div class="value accent">${db.products.length}</div></div>
+        <div class="stat"><div class="label">📦 Toplam Stok</div><div class="value">${totalStock}</div></div>
+        <div class="stat"><div class="label">🧾 Siparişler</div><div class="value">${db.orders.length}</div></div>
+        <div class="stat"><div class="label">💰 Ciro</div><div class="value accent">${money(revenue)}</div></div>
+      </div>
+      <div class="card">
+        <h3>Dikkat Gerektirenler</h3>
+        <div class="stat-grid" style="margin:0;">
+          <div class="stat"><div class="label">⏳ Bekleyen sipariş</div><div class="value">${pending}</div></div>
+          <div class="stat"><div class="label">⚠️ Az stoklu ürün</div><div class="value" style="color:var(--amber)">${low}</div></div>
+          <div class="stat"><div class="label">⛔ Tükenen ürün</div><div class="value" style="color:var(--red)">${out}</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Son Siparişler</h3>
+        <div id="recentOrders"></div>
+      </div>`;
+
+    const recent = db.orders.slice().reverse().slice(0, 5);
+    document.getElementById('recentOrders').innerHTML = recent.length ? `
+      <div class="table-wrap"><table>
+        <thead><tr><th>Müşteri</th><th>Tarih</th><th>Tutar</th><th>Durum</th></tr></thead>
+        <tbody>${recent.map(o => `
+          <tr><td>${esc(o.customer)}</td><td>${esc(o.date)}</td>
+          <td class="price">${money(o.total)}</td><td>${statusBadge(o.status)}</td></tr>`).join('')}
+        </tbody></table></div>`
+      : emptyBox('🛍️', 'Henüz sipariş yok');
+  };
+
+  function statusBadge(s) {
+    const map = { pending: ['pending','Bekliyor'], shipped: ['shipped','Kargoda'], done: ['done','Tamamlandı'], cancel: ['cancel','İptal'] };
+    const [cls, label] = map[s] || ['pending', s];
+    return `<span class="badge ${cls}">${label}</span>`;
+  }
+  function stockBadge(n) {
+    n = Number(n);
+    if (n === 0) return '<span class="badge out">Tükendi</span>';
+    if (n <= db.settings.lowStock) return `<span class="badge low">Az (${n})</span>`;
+    return `<span class="badge ok">${n} adet</span>`;
+  }
+  function emptyBox(icon, text) {
+    return `<div class="empty"><div class="big">${icon}</div>${esc(text)}</div>`;
+  }
+
+  /* =========================================================
+     ÜRÜNLER
+  ========================================================= */
+  let prodFilter = { q: '', cat: '' };
+  pages.products = function () {
+    document.getElementById('topbarActions').innerHTML =
+      `<button class="btn" id="addProdBtn">＋ Yeni Ürün</button>`;
+    document.getElementById('addProdBtn').addEventListener('click', () => productModal());
+
+    const c = document.getElementById('pageContent');
+    c.innerHTML = `
+      <div class="toolbar">
+        <div class="search"><span class="si">🔍</span><input class="input" id="prodSearch" placeholder="Ürün adı veya SKU ara..."></div>
+        <select class="input select" id="prodCat">
+          <option value="">Tüm kategoriler</option>
+          ${db.categories.map(cat => `<option value="${cat.id}">${esc(cat.name)}</option>`).join('')}
+        </select>
+      </div>
+      <div id="prodTable"></div>`;
+
+    const s = document.getElementById('prodSearch');
+    const cat = document.getElementById('prodCat');
+    s.value = prodFilter.q; cat.value = prodFilter.cat;
+    s.addEventListener('input', () => { prodFilter.q = s.value; renderProducts(); });
+    cat.addEventListener('change', () => { prodFilter.cat = cat.value; renderProducts(); });
+    renderProducts();
+  };
+
+  function renderProducts() {
+    const q = prodFilter.q.trim().toLowerCase();
+    let list = db.products.filter(p =>
+      (!prodFilter.cat || p.category === prodFilter.cat) &&
+      (!q || p.name.toLowerCase().includes(q) || (p.sku || '').toLowerCase().includes(q)));
+
+    const el = document.getElementById('prodTable');
+    if (!list.length) { el.innerHTML = emptyBox('👗', 'Ürün bulunamadı'); return; }
+
+    el.innerHTML = `
+      <div class="table-wrap"><table>
+        <thead><tr><th>Ürün</th><th>Kategori</th><th>Fiyat</th><th>Stok</th><th style="text-align:right">İşlem</th></tr></thead>
+        <tbody>${list.map(p => `
+          <tr>
+            <td><div class="prod-cell">
+              <div class="thumb">👗</div>
+              <div><div class="pn">${esc(p.name)}</div><div class="pc">${esc(p.sku || '')}</div></div>
+            </div></td>
+            <td><span class="badge cat">${esc(catName(p.category))}</span></td>
+            <td class="price">${money(p.price)}</td>
+            <td>${stockBadge(p.stock)}</td>
+            <td><div class="row-actions">
+              <button class="icon-btn" data-edit="${p.id}" title="Düzenle">✏️</button>
+              <button class="icon-btn del" data-del="${p.id}" title="Sil">🗑️</button>
+            </div></td>
+          </tr>`).join('')}
+        </tbody></table></div>`;
+
+    el.querySelectorAll('[data-edit]').forEach(b =>
+      b.addEventListener('click', () => productModal(b.dataset.edit)));
+    el.querySelectorAll('[data-del]').forEach(b =>
+      b.addEventListener('click', () => {
+        const p = db.products.find(x => x.id === b.dataset.del);
+        confirmModal(`"${p.name}" ürününü silmek istediğine emin misin?`, () => {
+          db.products = db.products.filter(x => x.id !== b.dataset.del);
+          save(); renderProducts(); toast('Ürün silindi');
+        });
+      }));
+  }
+
+  function productModal(id) {
+    const p = id ? db.products.find(x => x.id === id) : { name:'', category: db.categories[0] && db.categories[0].id, price:'', stock:'', sku:'', desc:'' };
+    openModal(`${id ? 'Ürünü Düzenle' : 'Yeni Ürün'}`, `
+      <div class="form-grid">
+        <div class="field full"><label>Ürün adı</label><input class="input" id="f_name" value="${esc(p.name)}" placeholder="Ör. Saten Midi Elbise"></div>
+        <div class="field"><label>Kategori</label>
+          <select class="input" id="f_cat">${db.categories.map(c => `<option value="${c.id}" ${c.id===p.category?'selected':''}>${esc(c.name)}</option>`).join('')}</select>
+        </div>
+        <div class="field"><label>SKU / Kod</label><input class="input" id="f_sku" value="${esc(p.sku)}" placeholder="LMS-001"></div>
+        <div class="field"><label>Fiyat (${db.settings.currency})</label><input class="input" id="f_price" type="number" min="0" step="0.01" value="${esc(p.price)}"></div>
+        <div class="field"><label>Stok adedi</label><input class="input" id="f_stock" type="number" min="0" step="1" value="${esc(p.stock)}"></div>
+        <div class="field full"><label>Açıklama</label><textarea class="input" id="f_desc" placeholder="Kısa ürün açıklaması...">${esc(p.desc)}</textarea></div>
+      </div>`,
+      () => {
+        const name = document.getElementById('f_name').value.trim();
+        if (!name) { toast('Ürün adı zorunlu', true); return false; }
+        const data = {
+          name,
+          category: document.getElementById('f_cat').value,
+          sku: document.getElementById('f_sku').value.trim(),
+          price: Number(document.getElementById('f_price').value) || 0,
+          stock: Number(document.getElementById('f_stock').value) || 0,
+          desc: document.getElementById('f_desc').value.trim()
+        };
+        if (id) { Object.assign(p, data); toast('Ürün güncellendi'); }
+        else { db.products.push(Object.assign({ id: uid('p') }, data)); toast('Ürün eklendi'); }
+        save(); renderProducts();
+        return true;
+      });
+    setTimeout(() => document.getElementById('f_name').focus(), 50);
+  }
+
+  /* =========================================================
+     SİPARİŞLER
+  ========================================================= */
+  let orderFilter = '';
+  pages.orders = function () {
+    const c = document.getElementById('pageContent');
+    c.innerHTML = `
+      <div class="toolbar">
+        <select class="input select" id="ordStatus">
+          <option value="">Tüm durumlar</option>
+          <option value="pending">Bekliyor</option>
+          <option value="shipped">Kargoda</option>
+          <option value="done">Tamamlandı</option>
+          <option value="cancel">İptal</option>
+        </select>
+      </div>
+      <div id="ordTable"></div>`;
+    const sel = document.getElementById('ordStatus');
+    sel.value = orderFilter;
+    sel.addEventListener('change', () => { orderFilter = sel.value; renderOrders(); });
+    renderOrders();
+  };
+
+  function renderOrders() {
+    let list = db.orders.filter(o => !orderFilter || o.status === orderFilter).slice().reverse();
+    const el = document.getElementById('ordTable');
+    if (!list.length) { el.innerHTML = emptyBox('🛍️', 'Sipariş bulunamadı'); return; }
+    el.innerHTML = `
+      <div class="table-wrap"><table>
+        <thead><tr><th>Müşteri</th><th>Tarih</th><th>Ürün</th><th>Tutar</th><th>Durum</th><th style="text-align:right">Güncelle</th></tr></thead>
+        <tbody>${list.map(o => `
+          <tr>
+            <td><b>${esc(o.customer)}</b></td>
+            <td>${esc(o.date)}</td>
+            <td>${o.items} adet</td>
+            <td class="price">${money(o.total)}</td>
+            <td>${statusBadge(o.status)}</td>
+            <td><div class="row-actions">
+              <select class="input sm" data-status="${o.id}" style="width:auto;padding:6px 10px;font-size:0.82rem;">
+                <option value="pending" ${o.status==='pending'?'selected':''}>Bekliyor</option>
+                <option value="shipped" ${o.status==='shipped'?'selected':''}>Kargoda</option>
+                <option value="done" ${o.status==='done'?'selected':''}>Tamamlandı</option>
+                <option value="cancel" ${o.status==='cancel'?'selected':''}>İptal</option>
+              </select>
+            </div></td>
+          </tr>`).join('')}
+        </tbody></table></div>`;
+    el.querySelectorAll('[data-status]').forEach(s =>
+      s.addEventListener('change', () => {
+        const o = db.orders.find(x => x.id === s.dataset.status);
+        o.status = s.value; save(); renderOrders(); toast('Sipariş durumu güncellendi');
+      }));
+  }
+
+  /* =========================================================
+     KATEGORİLER
+  ========================================================= */
+  pages.categories = function () {
+    document.getElementById('topbarActions').innerHTML =
+      `<button class="btn" id="addCatBtn">＋ Yeni Kategori</button>`;
+    document.getElementById('addCatBtn').addEventListener('click', () => catModal());
+    renderCategories();
+  };
+
+  function renderCategories() {
+    const c = document.getElementById('pageContent');
+    if (!db.categories.length) { c.innerHTML = emptyBox('🏷️', 'Kategori yok'); return; }
+    c.innerHTML = `
+      <div class="table-wrap"><table>
+        <thead><tr><th>Kategori</th><th>Ürün sayısı</th><th style="text-align:right">İşlem</th></tr></thead>
+        <tbody>${db.categories.map(cat => {
+          const count = db.products.filter(p => p.category === cat.id).length;
+          return `<tr>
+            <td><span class="badge cat">${esc(cat.name)}</span></td>
+            <td>${count} ürün</td>
+            <td><div class="row-actions">
+              <button class="icon-btn" data-edit="${cat.id}" title="Düzenle">✏️</button>
+              <button class="icon-btn del" data-del="${cat.id}" title="Sil">🗑️</button>
+            </div></td></tr>`;
+        }).join('')}
+        </tbody></table></div>`;
+    c.querySelectorAll('[data-edit]').forEach(b =>
+      b.addEventListener('click', () => catModal(b.dataset.edit)));
+    c.querySelectorAll('[data-del]').forEach(b =>
+      b.addEventListener('click', () => {
+        const cat = db.categories.find(x => x.id === b.dataset.del);
+        const count = db.products.filter(p => p.category === cat.id).length;
+        if (count) { toast(`Bu kategoride ${count} ürün var, önce onları taşıyın`, true); return; }
+        confirmModal(`"${cat.name}" kategorisini silmek istediğine emin misin?`, () => {
+          db.categories = db.categories.filter(x => x.id !== b.dataset.del);
+          save(); renderCategories(); toast('Kategori silindi');
+        });
+      }));
+  }
+
+  function catModal(id) {
+    const cat = id ? db.categories.find(x => x.id === id) : { name: '' };
+    openModal(`${id ? 'Kategoriyi Düzenle' : 'Yeni Kategori'}`, `
+      <div class="field"><label>Kategori adı</label><input class="input" id="c_name" value="${esc(cat.name)}" placeholder="Ör. Elbise"></div>`,
+      () => {
+        const name = document.getElementById('c_name').value.trim();
+        if (!name) { toast('Kategori adı zorunlu', true); return false; }
+        if (id) { cat.name = name; toast('Kategori güncellendi'); }
+        else { db.categories.push({ id: uid('c'), name }); toast('Kategori eklendi'); }
+        save(); renderCategories();
+        return true;
+      });
+    setTimeout(() => document.getElementById('c_name').focus(), 50);
+  }
+
+  /* =========================================================
+     AYARLAR
+  ========================================================= */
+  pages.settings = function () {
+    const c = document.getElementById('pageContent');
+    c.innerHTML = `
+      <div class="card">
+        <h3>Mağaza Bilgileri</h3>
+        <div class="form-grid">
+          <div class="field"><label>Mağaza adı</label><input class="input" id="s_store" value="${esc(db.settings.storeName)}"></div>
+          <div class="field"><label>Para birimi simgesi</label><input class="input" id="s_cur" value="${esc(db.settings.currency)}" maxlength="3"></div>
+          <div class="field"><label>Az stok eşiği</label><input class="input" id="s_low" type="number" min="1" value="${esc(db.settings.lowStock)}"></div>
+        </div>
+        <div style="margin-top:16px"><button class="btn" id="saveStore">Kaydet</button></div>
+      </div>
+      <div class="card">
+        <h3>Güvenlik</h3>
+        <div class="form-grid">
+          <div class="field full"><label>Yeni parola</label><input class="input" id="s_pw" type="password" placeholder="Yeni parolayı gir"></div>
+          <div class="field full"><label>Yeni parola (tekrar)</label><input class="input" id="s_pw2" type="password" placeholder="Tekrar gir"></div>
+        </div>
+        <div style="margin-top:16px"><button class="btn" id="savePw">Parolayı Değiştir</button></div>
+      </div>
+      <div class="card">
+        <h3>Veri Yönetimi</h3>
+        <p style="color:var(--muted);font-size:0.88rem;margin-bottom:14px">Verileri yedekle veya baştan başlamak için sıfırla.</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn ghost" id="exportBtn">⬇ Yedek Al (JSON)</button>
+          <button class="btn danger" id="resetBtn">Tüm Verileri Sıfırla</button>
+        </div>
+      </div>`;
+
+    document.getElementById('saveStore').addEventListener('click', () => {
+      db.settings.storeName = document.getElementById('s_store').value.trim() || 'Lumas Butik';
+      db.settings.currency = document.getElementById('s_cur').value.trim() || '₺';
+      db.settings.lowStock = Math.max(1, Number(document.getElementById('s_low').value) || 5);
+      save(); toast('Ayarlar kaydedildi');
+    });
+    document.getElementById('savePw').addEventListener('click', () => {
+      const a = document.getElementById('s_pw').value, b = document.getElementById('s_pw2').value;
+      if (!a || a.length < 3) { toast('Parola en az 3 karakter olmalı', true); return; }
+      if (a !== b) { toast('Parolalar eşleşmiyor', true); return; }
+      db.settings.password = a; save(); toast('Parola değiştirildi');
+      document.getElementById('s_pw').value = ''; document.getElementById('s_pw2').value = '';
+    });
+    document.getElementById('exportBtn').addEventListener('click', () => {
+      const blob = new Blob([JSON.stringify(db, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'lumas-butik-yedek.json';
+      a.click(); URL.revokeObjectURL(a.href);
+      toast('Yedek indirildi');
+    });
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      confirmModal('Tüm ürün, sipariş ve kategoriler silinip başlangıç verilerine dönülecek. Emin misin?', () => {
+        localStorage.removeItem(DB_KEY); db = load(); toast('Veriler sıfırlandı'); navigate('settings');
+      });
+    });
+  };
+
+  /* =========================================================
+     Genel Modal & Confirm
+  ========================================================= */
+  function openModal(title, bodyHTML, onSave) {
+    const back = document.createElement('div');
+    back.className = 'modal-back';
+    back.innerHTML = `
+      <div class="modal">
+        <h3>${esc(title)}</h3>
+        <div class="modal-body">${bodyHTML}</div>
+        <div class="modal-actions">
+          <button class="btn ghost" data-cancel>İptal</button>
+          <button class="btn" data-save>Kaydet</button>
+        </div>
+      </div>`;
+    document.body.appendChild(back);
+    const close = () => back.remove();
+    back.querySelector('[data-cancel]').addEventListener('click', close);
+    back.addEventListener('click', e => { if (e.target === back) close(); });
+    back.querySelector('[data-save]').addEventListener('click', () => {
+      if (onSave() !== false) close();
+    });
+  }
+
+  function confirmModal(msg, onYes) {
+    const back = document.createElement('div');
+    back.className = 'modal-back';
+    back.innerHTML = `
+      <div class="modal" style="max-width:400px">
+        <h3>Onay</h3>
+        <p style="color:var(--muted);line-height:1.5">${esc(msg)}</p>
+        <div class="modal-actions">
+          <button class="btn ghost" data-no>Vazgeç</button>
+          <button class="btn danger" data-yes>Evet, devam et</button>
+        </div>
+      </div>`;
+    document.body.appendChild(back);
+    const close = () => back.remove();
+    back.querySelector('[data-no]').addEventListener('click', close);
+    back.addEventListener('click', e => { if (e.target === back) close(); });
+    back.querySelector('[data-yes]').addEventListener('click', () => { onYes(); close(); });
+  }
+
+  /* ---------------- Başlat ---------------- */
+  if (sessionStorage.getItem(AUTH_KEY) === '1') showApp();
+  else pw.focus();
+})();
+</script>
+</body>
+</html>
