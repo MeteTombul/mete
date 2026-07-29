@@ -39,9 +39,17 @@ class TikTokUploader(Uploader):
         return self._token() is not None
 
     def authorize(self) -> str:
+        # tiktok_app.json (client_key/secret) varsa tek-tıkla OAuth akışını çalıştır.
+        app_file = self.secrets_dir / "tiktok_app.json"
+        if app_file.exists():
+            from ..tiktok_auth import run as tiktok_run
+            return tiktok_run(self.secrets_dir)
         return (
-            "TikTok için OAuth ile bir access token alıp "
-            f"{self.token_path} dosyasına yazın veya TIKTOK_ACCESS_TOKEN ayarlayın."
+            "TikTok bağlamak için önce "
+            f"{app_file} oluşturun: "
+            '{"client_key":"...","client_secret":"...","redirect_uri":"http://localhost:5599/callback"} '
+            "— sonra tekrar 'tiktok yetkilendir'e tıklayın. (Redirect URI'yi TikTok panelinde de "
+            "birebir aynı kaydedin.)"
         )
 
     def upload(self, clip_path: Path, meta: dict) -> UploadResult:
