@@ -17,8 +17,12 @@ Ve TikTok panelinde Redirect URI olarak TAM OLARAK aynı adresi kaydet.
 
 from __future__ import annotations
 
+import base64
+import hashlib
 import http.server
 import json
+import secrets as pysecrets
+import string
 import sys
 import threading
 import urllib.parse
@@ -55,7 +59,18 @@ class _Handler(http.server.BaseHTTPRequestHandler):
         pass
 
 
-def _exchange_code(client_key: str, client_secret: str, code: str, redirect_uri: str) -> dict:
+def _make_pkce() -> tuple[str, str]:
+    """PKCE code_verifier ve code_challenge (S256, base64url) üretir."""
+    alphabet = string.ascii_letters + string.digits + "-._~"
+    verifier = "".join(pysecrets.choice(alphabet) for _ in range(64))
+    digest = hashlib.sha256(verifier.encode("ascii")).digest()
+    challenge = base64.urlsafe_b64encode(digest).rstrip(b"=").decode("ascii")
+    return verifier, challenge
+
+
+def _exchange_code(
+    client_key: str, client_secret: str, code: str, redirect_uri: str, code_verifier: str
+) -> dict:
     import requests
 
     resp = requests.post(
@@ -67,6 +82,7 @@ def _exchange_code(client_key: str, client_secret: str, code: str, redirect_uri:
             "code": code,
             "grant_type": "authorization_code",
             "redirect_uri": redirect_uri,
+            "code_verifier": code_verifier,
         },
         timeout=60,
     )
@@ -110,6 +126,9 @@ def run(secrets_dir: Path, log=print) -> str:
     host = parsed.hostname or "localhost"
     port = parsed.port or 5599
 
+    # PKCE (TikTok zorunlu kılar)
+    code_verifier, code_challenge = _make_pkce()
+
     # Yetkilendirme URL'sini aç
     auth_query = urllib.parse.urlencode({
         "client_key": client_key,
@@ -117,6 +136,8 @@ def run(secrets_dir: Path, log=print) -> str:
         "response_type": "code",
         "redirect_uri": redirect_uri,
         "state": "viralbot",
+        "code_challenge": code_challenge,
+        "code_challenge_method": "S256",
     })
     auth_url = f"{AUTH_URL}?{auth_query}"
 
@@ -136,7 +157,9 @@ def run(secrets_dir: Path, log=print) -> str:
         return f"Yetkilendirme reddedildi/hata: {_Handler.error}"
 
     try:
-        data = _exchange_code(client_key, client_secret, _Handler.code, redirect_uri)
+        data = _exchange_code(
+            client_key, client_secret, _Handler.code, redirect_uri, code_verifier
+        )
     except Exception as e:  # noqa: BLE001
         return f"Token alınamadı: {e}"
 
