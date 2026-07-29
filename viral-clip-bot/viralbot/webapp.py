@@ -82,6 +82,9 @@ INDEX_HTML = """
    <a href="{{ url_for('authorize', platform=p) }}">{{p}} yetkilendir</a> &nbsp;
   {% endfor %}
  </div>
+ <div style="margin-top:6px">
+  <a href="{{ url_for('tiktok_setup') }}">TikTok anahtarlarını gir →</a>
+ </div>
 </div>
 
 <form method="post" action="{{ url_for('start') }}">
@@ -258,6 +261,84 @@ def start():
 def status():
     with _lock:
         return jsonify(running=_job["running"], logs=_job["logs"][-200:])
+
+
+TIKTOK_SETUP_HTML = """
+<!doctype html><html lang="tr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TikTok anahtarları</title>
+<style>body{font-family:system-ui,sans-serif;max-width:640px;margin:24px auto;padding:0 16px;
+ background:#0f172a;color:#e2e8f0}a{color:#38bdf8}
+ label{display:block;margin:12px 0 4px;font-weight:600}
+ input{width:100%;padding:8px;border-radius:8px;border:1px solid #334155;background:#1e293b;
+ color:#e2e8f0;box-sizing:border-box}
+ button{margin-top:16px;padding:12px 24px;border:0;border-radius:999px;font-weight:700;
+ cursor:pointer;background:linear-gradient(90deg,#38bdf8,#a78bfa);color:#0f172a}
+ .card{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:16px;margin:16px 0}
+ code{background:#020617;padding:2px 6px;border-radius:4px}</style></head><body>
+<h1>TikTok anahtarları</h1>
+<a href="{{ url_for('index') }}">← geri</a>
+<div class="card">
+ developers.tiktok.com'daki uygulamandan <b>Client key</b> ve <b>Client secret</b> değerlerini
+ buraya yapıştır. TikTok panelinde <b>Redirect URI</b> olarak da
+ <code>http://localhost:5599/callback</code> kaydetmeyi unutma.
+</div>
+{% if saved %}<div class="card">✓ Kaydedildi. Şimdi
+ <a href="{{ url_for('authorize', platform='tiktok') }}">TikTok'u yetkilendir →</a></div>{% endif %}
+{% if error %}<div class="card">⚠ {{ error }}</div>{% endif %}
+<form method="post">
+ <label>Client key</label>
+ <input name="client_key" value="{{ client_key }}" required>
+ <label>Client secret</label>
+ <input name="client_secret" value="{{ client_secret }}" required>
+ <label>Redirect URI</label>
+ <input name="redirect_uri" value="{{ redirect_uri }}">
+ <button>Kaydet</button>
+</form>
+</body></html>
+"""
+
+
+@app.route("/tiktok/setup", methods=["GET", "POST"])
+def tiktok_setup():
+    import json as _json
+    SECRETS_DIR.mkdir(parents=True, exist_ok=True)
+    app_file = SECRETS_DIR / "tiktok_app.json"
+    ck = cs = ""
+    redirect = "http://localhost:5599/callback"
+    saved = False
+    error = None
+
+    if app_file.exists():
+        try:
+            from .util import read_text_any
+            cfg = _json.loads(read_text_any(app_file))
+            ck = cfg.get("client_key", "")
+            cs = cfg.get("client_secret", "")
+            redirect = cfg.get("redirect_uri", redirect)
+        except Exception:  # noqa: BLE001
+            pass
+
+    if request.method == "POST":
+        ck = request.form.get("client_key", "").strip()
+        cs = request.form.get("client_secret", "").strip()
+        redirect = request.form.get("redirect_uri", "").strip() or redirect
+        if not ck or not cs:
+            error = "Client key ve Client secret boş olamaz."
+        else:
+            app_file.write_text(
+                _json.dumps(
+                    {"client_key": ck, "client_secret": cs, "redirect_uri": redirect},
+                    ensure_ascii=False, indent=2,
+                ),
+                encoding="utf-8",
+            )
+            saved = True
+
+    return render_template_string(
+        TIKTOK_SETUP_HTML, client_key=ck, client_secret=cs,
+        redirect_uri=redirect, saved=saved, error=error,
+    )
 
 
 @app.route("/authorize/<platform>")

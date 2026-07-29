@@ -88,7 +88,18 @@ def run(secrets_dir: Path, log=print) -> str:
         )
 
     from .util import read_text_any
-    cfg = json.loads(read_text_any(app_file))
+    raw = read_text_any(app_file)
+    # Kopyala-yapıştırdan gelen eğri/akıllı tırnakları düz tırnağa çevir
+    for bad, good in (("“", '"'), ("”", '"'), ("‘", "'"), ("’", "'")):
+        raw = raw.replace(bad, good)
+    try:
+        cfg = json.loads(raw)
+    except json.JSONDecodeError as e:
+        return (
+            f"{app_file} geçerli bir JSON değil ({e}). Dosyanın tam olarak şöyle "
+            'olduğundan emin olun (değerler DÜZ çift tırnak içinde): '
+            '{"client_key":"...","client_secret":"...","redirect_uri":"http://localhost:5599/callback"}'
+        )
     client_key = cfg.get("client_key", "").strip()
     client_secret = cfg.get("client_secret", "").strip()
     redirect_uri = cfg.get("redirect_uri", DEFAULT_REDIRECT).strip()
