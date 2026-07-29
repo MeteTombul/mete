@@ -32,7 +32,8 @@ class TikTokUploader(Uploader):
         if os.environ.get("TIKTOK_ACCESS_TOKEN"):
             return os.environ["TIKTOK_ACCESS_TOKEN"].strip()
         if self.token_path.exists():
-            return self.token_path.read_text(encoding="utf-8").strip()
+            from ..util import read_text_any
+            return read_text_any(self.token_path).strip()
         return None
 
     def is_configured(self) -> bool:

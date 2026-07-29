@@ -37,7 +37,8 @@ class InstagramUploader(Uploader):
         token = os.environ.get("IG_ACCESS_TOKEN")
         user_id = os.environ.get("IG_USER_ID")
         if (not token or not user_id) and self.config_path.exists():
-            data = json.loads(self.config_path.read_text(encoding="utf-8"))
+            from ..util import read_text_any
+            data = json.loads(read_text_any(self.config_path))
             token = token or data.get("access_token")
             user_id = user_id or data.get("ig_user_id")
         return token, user_id

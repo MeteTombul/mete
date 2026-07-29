@@ -87,7 +87,8 @@ def run(secrets_dir: Path, log=print) -> str:
             '{"client_key":"...","client_secret":"...","redirect_uri":"http://localhost:5599/callback"}'
         )
 
-    cfg = json.loads(app_file.read_text(encoding="utf-8"))
+    from .util import read_text_any
+    cfg = json.loads(read_text_any(app_file))
     client_key = cfg.get("client_key", "").strip()
     client_secret = cfg.get("client_secret", "").strip()
     redirect_uri = cfg.get("redirect_uri", DEFAULT_REDIRECT).strip()
