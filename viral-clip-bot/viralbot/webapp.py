@@ -27,6 +27,7 @@ from flask import (
     url_for,
 )
 
+from . import channel as channel_mod
 from .config import RenderOptions
 from .pipeline import run as run_pipeline
 from .uploaders import available_platforms, get_uploader
@@ -84,8 +85,9 @@ INDEX_HTML = """
 </div>
 
 <form method="post" action="{{ url_for('start') }}">
- <label>Kanal URL'si</label>
- <input name="channel_url" placeholder="https://www.youtube.com/@kanaladi" required>
+ <label>Kanal URL'si veya tek video linki</label>
+ <input name="channel_url" placeholder="https://youtube.com/@kanal  —  ya da  —  https://youtube.com/watch?v=..." required>
+ <small style="color:#94a3b8">Kanal linki: en çok izlenen videoları işler. Tek video linki: yalnızca o videoyu işler.</small>
  <div class="row">
   <div><label>Video sayısı</label><input name="videos" type="number" value="3"></div>
   <div><label>Video başına klip</label><input name="moments" type="number" value="3"></div>
@@ -216,17 +218,26 @@ def start():
     targets = [
         p for p in ("youtube", "tiktok", "instagram") if f.get(f"up_{p}")
     ]
+    src_url = f["channel_url"].strip()
     params = dict(
-        channel_url=f["channel_url"],
+        channel_url=src_url,
         out_dir=OUT_DIR,
         opts=opts,
-        top_videos=int(f.get("videos", 3)),
         moments_per_video=int(f.get("moments", 3)),
         whisper_model=f.get("whisper_model", "small"),
         use_scenes=bool(f.get("scenes")),
         upload_targets=targets,
         secrets_dir=SECRETS_DIR,
     )
+    # Tek video linki mi, kanal mı?
+    if channel_mod.is_video_url(src_url):
+        try:
+            params["videos"] = [channel_mod.video_from_url(src_url)]
+            _log("Tek video linki algılandı — sadece bu video işlenecek.")
+        except Exception as e:  # noqa: BLE001
+            _log(f"Video bilgisi alınamadı: {e}")
+    else:
+        params["top_videos"] = int(f.get("videos", 3))
 
     def job():
         try:

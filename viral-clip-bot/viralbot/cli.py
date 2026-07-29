@@ -10,6 +10,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
+from . import channel as channel_mod
 from .config import RenderOptions
 from .pipeline import run
 
@@ -36,7 +37,12 @@ def main(argv: list[str] | None = None) -> int:
         "bulur, Türkçe altyazı/karaoke ekler ve baş/son efektli dikey (Shorts) klipler "
         "+ kapak + SEO metası üretir.",
     )
-    p.add_argument("channel_url", help="Kanal URL'si (ör. https://www.youtube.com/@kanaladi)")
+    p.add_argument(
+        "channel_url",
+        metavar="URL",
+        help="Kanal URL'si (ör. .../@kanaladi) VEYA tek bir video linki "
+             "(ör. .../watch?v=...). Tek video verilirse yalnızca o video işlenir.",
+    )
     p.add_argument("-o", "--out", default="cikti", help="Çıktı klasörü (vars. cikti)")
     p.add_argument("--videos", type=int, default=3, help="İşlenecek video sayısı (vars. 3)")
     p.add_argument("--moments", type=int, default=3, help="Video başına klip sayısı (vars. 3)")
@@ -178,6 +184,16 @@ def main(argv: list[str] | None = None) -> int:
                     args.channel_url, Path(args.out),
                     interval=args.interval, check_count=args.check_count, **common,
                 )
+        elif channel_mod.is_video_url(args.channel_url):
+            # Tek video: yalnızca o videoyu işle
+            print("Tek video linki algılandı — sadece bu video işlenecek.")
+            video = channel_mod.video_from_url(args.channel_url)
+            run(
+                channel_url=args.channel_url,
+                out_dir=Path(args.out),
+                videos=[video],
+                **common,
+            )
         else:
             run(
                 channel_url=args.channel_url,

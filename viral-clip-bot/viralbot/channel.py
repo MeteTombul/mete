@@ -16,6 +16,32 @@ class Video:
     duration: int | None = None
 
 
+def is_video_url(url: str) -> bool:
+    """Bağlantı tek bir videoyu mu işaret ediyor? (kanal/oynatma listesi değil)."""
+    u = url.lower()
+    return (
+        "watch?v=" in u
+        or "youtu.be/" in u
+        or "/shorts/" in u
+        or "&v=" in u
+    )
+
+
+def video_from_url(url: str) -> "Video":
+    """Tek bir video bağlantısından Video nesnesi üretir (başlık, id, izlenme)."""
+    opts = {"quiet": True, "no_warnings": True, "no_color": True, "skip_download": True}
+    with YoutubeDL(opts) as ydl:
+        info = ydl.extract_info(url, download=False)
+    vid = info.get("id") or "video"
+    return Video(
+        id=vid,
+        title=info.get("title") or "(başlıksız)",
+        url=info.get("webpage_url") or url,
+        view_count=int(info.get("view_count") or 0),
+        duration=info.get("duration"),
+    )
+
+
 def _normalize_channel_url(channel_url: str) -> str:
     """Kanal URL'sinin videolar sekmesini hedeflediğinden emin ol."""
     url = channel_url.rstrip("/")

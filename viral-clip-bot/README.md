@@ -79,8 +79,15 @@ cp .env.example .env
 ## Kullanım
 
 ```bash
+# Kanal: en çok izlenen videoları işler
 python -m viralbot "https://www.youtube.com/@KANAL_ADI"
+
+# Tek video: yalnızca o videoyu analiz eder, viral kısımlarından Shorts üretir
+python -m viralbot "https://www.youtube.com/watch?v=VIDEO_ID"
 ```
+
+> Kanal linki mi yoksa tek video linki mi verdiğin **otomatik algılanır**. Tek video için
+> `--moments` ile o videodan kaç klip çıkacağını ayarlayabilirsin (ör. `--moments 5`).
 
 Seçenekler:
 
