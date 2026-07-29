@@ -1,0 +1,6 @@
+# Windows toplu iş dosyaları her zaman CRLF olmalı (yoksa cmd penceresi aniden kapanabilir)
+*.bat text eol=crlf
+
+# Unix betikleri LF kalsın
+*.sh text eol=lf
+*.command text eol=lf
