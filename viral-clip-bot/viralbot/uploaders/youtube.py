@@ -70,6 +70,16 @@ class YouTubeUploader(Uploader):
             youtube = build("youtube", "v3", credentials=creds)
 
             title = self._title(meta)[:100]
+            status = {
+                "privacyStatus": meta.get("privacy", "public"),
+                "selfDeclaredMadeForKids": False,
+            }
+            # Zamanlı yayın: publish_at verilirse video özel yüklenir ve o zamanda
+            # YouTube tarafından otomatik olarak herkese açık yapılır.
+            publish_at = meta.get("publish_at")
+            if publish_at:
+                status["privacyStatus"] = "private"
+                status["publishAt"] = publish_at
             body = {
                 "snippet": {
                     "title": title,
@@ -77,10 +87,7 @@ class YouTubeUploader(Uploader):
                     "tags": self._hashtags(meta)[:15],
                     "categoryId": "22",
                 },
-                "status": {
-                    "privacyStatus": meta.get("privacy", "private"),
-                    "selfDeclaredMadeForKids": False,
-                },
+                "status": status,
             }
             media = MediaFileUpload(str(clip_path), chunksize=-1, resumable=True)
             request = youtube.videos().insert(

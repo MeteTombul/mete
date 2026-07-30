@@ -129,6 +129,30 @@ INDEX_HTML = """
   <label class="chk"><input type="checkbox" name="up_tiktok">TikTok</label>
   <label class="chk"><input type="checkbox" name="up_instagram">Instagram</label>
  </div>
+
+ <div class="card" style="margin-top:12px">
+  <b>📤 YouTube yayın zamanlaması</b>
+  <div class="row" style="margin-top:8px">
+   <div><label>Gizlilik</label>
+    <select name="yt_privacy">
+      <option value="public" selected>Herkese açık</option>
+      <option value="unlisted">Liste dışı</option>
+      <option value="private">Özel</option>
+    </select>
+   </div>
+   <div><label>Videolar arası (saat)</label>
+    <input name="interval_hours" type="number" step="0.5" value="0"
+           placeholder="0 = hepsi hemen">
+   </div>
+   <div><label>İlk video kaç saat sonra</label>
+    <input name="start_hours" type="number" step="0.5" value="0">
+   </div>
+  </div>
+  <small style="color:#94a3b8">Aralık &gt; 0 ise her klip, belirtilen saat arayla YouTube'da
+   otomatik <b>herkese açık</b> olur (video kapalıyken bile YouTube yayınlar). 0 ise hepsi
+   hemen yayınlanır.</small>
+ </div>
+
  <button {{ 'disabled' if running }}>Başlat</button>
 </form>
 
@@ -231,6 +255,9 @@ def start():
         use_scenes=bool(f.get("scenes")),
         upload_targets=targets,
         secrets_dir=SECRETS_DIR,
+        youtube_privacy=f.get("yt_privacy", "public"),
+        schedule_interval_hours=float(f.get("interval_hours") or 0),
+        schedule_start_hours=float(f.get("start_hours") or 0),
     )
     # Tek video linki mi, kanal mı?
     if channel_mod.is_video_url(src_url):

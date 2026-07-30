@@ -96,6 +96,19 @@ def main(argv: list[str] | None = None) -> int:
         help="OAuth token/kimlik dosyaları klasörü (vars. <çıktı>/secrets)",
     )
     p.add_argument(
+        "--yt-privacy", choices=["public", "unlisted", "private"], default="public",
+        help="YouTube gizlilik durumu (vars. public = herkese açık)",
+    )
+    p.add_argument(
+        "--schedule-interval-hours", type=float, default=0.0,
+        help="Videolar arası yayın aralığı, saat. 0 = hepsi hemen yayınlanır. "
+             "Ör. 6 → her 6 saatte bir video otomatik herkese açık olur.",
+    )
+    p.add_argument(
+        "--schedule-start-hours", type=float, default=0.0,
+        help="İlk videonun kaç saat sonra yayınlanacağı (vars. 0 = hemen)",
+    )
+    p.add_argument(
         "--authorize", default="",
         help="Sadece hesap yetkilendirmesi yap ve çık (ör. youtube). Klip üretmez.",
     )
@@ -169,6 +182,9 @@ def main(argv: list[str] | None = None) -> int:
         workers=args.workers,
         upload_targets=[s for s in args.upload.split(",") if s.strip()],
         secrets_dir=args.secrets_dir,
+        youtube_privacy=args.yt_privacy,
+        schedule_start_hours=args.schedule_start_hours,
+        schedule_interval_hours=args.schedule_interval_hours,
     )
 
     try:

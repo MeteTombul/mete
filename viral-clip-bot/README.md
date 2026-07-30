@@ -119,10 +119,26 @@ python -m viralbot "https://www.youtube.com/@KANAL" \
   --no-karaoke  --no-scenes  --no-progress-bar \
   --no-loudnorm --no-thumbnail --no-srt --no-metadata
 
-# Otomatik yükleme
-  --upload youtube,tiktok,instagram \
+# Otomatik yükleme + YouTube zamanlı yayın
+  --upload youtube \
+  --yt-privacy public \            # public | unlisted | private (vars. public)
+  --schedule-interval-hours 6 \    # her 6 saatte bir video otomatik herkese açık
+  --schedule-start-hours 2 \       # ilk video 2 saat sonra yayınlansın
   --secrets-dir secrets
 ```
+
+### YouTube zamanlı yayın nasıl çalışır?
+
+`--schedule-interval-hours` (veya web arayüzünde **"Videolar arası (saat)"**) 0'dan büyükse,
+her klip **özel** yüklenir ve YouTube tarafından belirlenen saatte **otomatik herkese açık**
+olur (`publishAt`). Bilgisayarın o an kapalı olsa bile YouTube videoyu zamanı gelince yayınlar.
+Aralık 0 ise tüm klipler **hemen herkese açık** yüklenir.
+
+> ⚠️ **YouTube API notu:** Google projeniz **denetimden (audit) geçmemişse**, API ile yüklenen
+> videolar herkese açık yapılsa bile YouTube tarafından **özel** olarak kilitlenebilir. Bu,
+> Google'ın bir güvenlik politikasıdır; herkese açık API yüklemesi için projenizin YouTube
+> API uygunluk denetiminden geçmesi gerekir. Denetime kadar videoları YouTube Studio'dan elle
+> herkese açık yapabilirsiniz.
 
 ## 🤖 Otomatik / zamanlanmış üretim
 
