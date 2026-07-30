@@ -16,15 +16,71 @@ class Video:
     duration: int | None = None
 
 
+def _platform(url: str) -> str:
+    u = url.lower()
+    if "kick.com" in u:
+        return "kick"
+    if "youtube.com" in u or "youtu.be" in u:
+        return "youtube"
+    return "other"
+
+
 def is_video_url(url: str) -> bool:
     """Bağlantı tek bir videoyu mu işaret ediyor? (kanal/oynatma listesi değil)."""
     u = url.lower()
+    if "kick.com" in u:
+        # kick.com/video/<uuid> ya da .../clip... = tek medya; kick.com/<yayinci> = kanal
+        return "/video/" in u or "/clip" in u or "clips.kick" in u
     return (
         "watch?v=" in u
         or "youtu.be/" in u
         or "/shorts/" in u
         or "&v=" in u
     )
+
+
+def _kick_slug(url: str) -> str | None:
+    import re
+
+    m = re.search(r"kick\.com/([^/?#]+)", url, re.I)
+    return m.group(1) if m else None
+
+
+def _kick_channel_videos(slug: str, limit: int) -> list["Video"]:
+    """Kick kanalının VOD'larını (yayın kayıtlarını) Kick API'sinden çeker (en iyi çaba)."""
+    import requests
+
+    headers = {
+        "User-Agent": (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+            "(KHTML, like Gecko) Chrome/122.0 Safari/537.36"
+        ),
+        "Accept": "application/json",
+    }
+    r = requests.get(
+        f"https://kick.com/api/v2/channels/{slug}/videos", headers=headers, timeout=30
+    )
+    r.raise_for_status()
+    data = r.json()
+    if isinstance(data, dict):
+        data = data.get("data") or data.get("videos") or []
+
+    vids: list[Video] = []
+    for item in data:
+        v = item.get("video") if isinstance(item.get("video"), dict) else item
+        uuid = (v or {}).get("uuid") or item.get("uuid")
+        if not uuid:
+            continue
+        vids.append(
+            Video(
+                id=str(uuid),
+                title=item.get("session_title") or item.get("title") or "Kick VOD",
+                url=f"https://kick.com/video/{uuid}",
+                view_count=int(item.get("views") or (v or {}).get("views") or 0),
+                duration=item.get("duration") or (v or {}).get("duration"),
+            )
+        )
+    return vids[:limit]
 
 
 def video_from_url(url: str) -> "Video":
@@ -92,6 +148,14 @@ def list_top_videos(
     skip_music=True ise müzik/şarkı videoları elenir (bu adım her aday için
     kısa bir meta sorgusu yapar, biraz daha yavaştır).
     """
+    if _platform(channel_url) == "kick":
+        slug = _kick_slug(channel_url)
+        if not slug:
+            return []
+        vids = _kick_channel_videos(slug, limit * 3)
+        vids.sort(key=lambda v: v.view_count, reverse=True)
+        return vids[:limit]
+
     videos_url = _normalize_channel_url(channel_url)
 
     opts = {
@@ -139,6 +203,12 @@ def list_latest_videos(channel_url: str, limit: int = 5) -> list[Video]:
     Kanalın /videos sekmesi genelde en yeniyi başa koyar; bu yüzden liste
     sırası korunur (izlenmeye göre sıralanmaz).
     """
+    if _platform(channel_url) == "kick":
+        slug = _kick_slug(channel_url)
+        if not slug:
+            return []
+        return _kick_channel_videos(slug, limit)
+
     videos_url = _normalize_channel_url(channel_url)
     opts = {
         "quiet": True,

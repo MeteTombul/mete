@@ -261,11 +261,22 @@ def run(
 
     if videos is None:
         safe_log(f"[1/5] Kanal taranıyor: {channel_url}")
-        videos = channel_mod.list_top_videos(
-            channel_url, limit=top_videos, skip_music=opts.skip_music, log=safe_log
-        )
+        try:
+            videos = channel_mod.list_top_videos(
+                channel_url, limit=top_videos, skip_music=opts.skip_music, log=safe_log
+            )
+        except Exception as e:  # noqa: BLE001
+            safe_log(f"Kanal listesi alınamadı: {e}")
+            videos = []
     if not videos:
-        safe_log("Hiç video bulunamadı. URL'yi kontrol edin.")
+        if "kick.com" in channel_url.lower():
+            safe_log(
+                "Kick kanalından otomatik VOD listesi alınamadı (Kick bunu her zaman "
+                "vermiyor). Lütfen tek bir VOD linki yapıştırın: kick.com/video/... "
+                "— o zaman sadece o yayın işlenir."
+            )
+        else:
+            safe_log("Hiç video bulunamadı. URL'yi kontrol edin.")
         return []
     safe_log(f"  En çok izlenen {len(videos)} video seçildi:")
     for v in videos:

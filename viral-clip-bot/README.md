@@ -89,6 +89,24 @@ python -m viralbot "https://www.youtube.com/watch?v=VIDEO_ID"
 > Kanal linki mi yoksa tek video linki mi verdiğin **otomatik algılanır**. Tek video için
 > `--moments` ile o videodan kaç klip çıkacağını ayarlayabilirsin (ör. `--moments 5`).
 
+### Kick desteği
+
+YouTube'un yanı sıra **Kick** de desteklenir:
+
+```bash
+# Tek Kick VOD/klip (en güvenilir yol):
+python -m viralbot "https://kick.com/video/VOD_UUID"
+
+# Kick kanalı (en iyi çaba — Kick her zaman liste vermez):
+python -m viralbot "https://kick.com/YAYINCI_ADI"
+```
+
+- **Tek VOD/klip linki** her zaman çalışır (`kick.com/video/...`).
+- **Kanal linki** için Kick API'sinden VOD listesi çekilmeye çalışılır; Kick engellerse
+  uygulama sana "tek bir VOD linki yapıştır" der.
+- ⚠️ Başkasının yayınını izinsiz alıp yeniden yayınlamak Kick'te de telif/kural sorunu
+  olabilir — kendi veya izinli içerikle kullan.
+
 Seçenekler:
 
 ```bash

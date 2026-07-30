@@ -89,8 +89,10 @@ INDEX_HTML = """
 
 <form method="post" action="{{ url_for('start') }}">
  <label>Kanal URL'si veya tek video linki</label>
- <input name="channel_url" placeholder="https://youtube.com/@kanal  —  ya da  —  https://youtube.com/watch?v=..." required>
- <small style="color:#94a3b8">Kanal linki: en çok izlenen videoları işler. Tek video linki: yalnızca o videoyu işler.</small>
+ <input name="channel_url" placeholder="youtube.com/@kanal · youtube.com/watch?v=... · kick.com/yayinci · kick.com/video/..." required>
+ <small style="color:#94a3b8">YouTube kanal/video ya da Kick kanal/VOD linki. Kanal linki: en çok
+  izlenenleri işler. Tek video/VOD linki: yalnızca onu işler. (Kick kanal listesi bazen
+  alınamaz; o zaman tek bir <b>kick.com/video/...</b> linki yapıştır.)</small>
  <div class="row">
   <div><label>Video sayısı</label><input name="videos" type="number" value="3"></div>
   <div><label>Video başına klip</label><input name="moments" type="number" value="3"></div>
