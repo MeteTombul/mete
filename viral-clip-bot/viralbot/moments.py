@@ -19,16 +19,19 @@ def _extract_audio_energy(video_path: Path, tmp_dir: Path) -> list[float]:
     tmp_dir.mkdir(parents=True, exist_ok=True)
     wav_path = tmp_dir / (video_path.stem + "_16k.wav")
 
-    subprocess.run(
-        [
-            "ffmpeg", "-y", "-i", str(video_path),
-            "-ac", "1", "-ar", "16000", "-vn",
-            str(wav_path),
-        ],
-        check=True,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
-    )
+    try:
+        subprocess.run(
+            [
+                "ffmpeg", "-y", "-i", str(video_path),
+                "-ac", "1", "-ar", "16000", "-vn",
+                str(wav_path),
+            ],
+            check=True,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+    except Exception:  # noqa: BLE001
+        return []
 
     energies: list[float] = []
     with wave.open(str(wav_path), "rb") as wf:
@@ -76,6 +79,68 @@ def _transcript_lines(transcript: Transcript) -> str:
     return "\n".join(lines)
 
 
+def _fallback_moments(
+    energies: list[float],
+    transcript: Transcript,
+    duration: float,
+    max_moments: int,
+    clip_min: int,
+    clip_max: int,
+) -> list[dict]:
+    """Claude olmadan, ses enerjisi (yoksa eşit aralık) ile an seçer. Her zaman klip üretir."""
+    win = int(min(clip_max, max(clip_min, 30)))
+    chosen: list[dict] = []
+    used: list[tuple[float, float]] = []
+
+    def _text_at(start: float, end: float) -> str:
+        return " ".join(
+            s.text.strip() for s in transcript.segments
+            if s.start >= start and s.start < end and s.text.strip()
+        ).strip()
+
+    if energies:
+        # Kayan pencere enerji ortalamasına göre en yüksek, çakışmayan bölümler
+        scores = []
+        for start in range(0, max(1, len(energies) - 1), 5):
+            seg = energies[start:start + win]
+            if seg:
+                scores.append((start, sum(seg) / len(seg)))
+        scores.sort(key=lambda x: x[1], reverse=True)
+        for start, sc in scores:
+            end = min(duration, start + win)
+            if end - start < clip_min:
+                continue
+            if any(not (end <= s or start >= e) for s, e in used):
+                continue
+            used.append((start, end))
+            txt = _text_at(start, end)
+            chosen.append({
+                "start": float(start), "end": float(end),
+                "title": (txt[:40] or "Öne çıkan an"),
+                "hook": txt[:60], "reason": "ses enerjisi tepe noktası",
+                "score": round(sc, 1),
+            })
+            if len(chosen) >= max_moments:
+                break
+
+    if not chosen:
+        # Ses verisi yok → videoyu eşit aralıklara böl
+        n = max(1, min(max_moments, int(duration // win) or 1))
+        step = duration / (n + 1)
+        for i in range(1, n + 1):
+            start = max(0.0, step * i - win / 2)
+            end = min(duration, start + win)
+            if end - start < min(clip_min, 5):
+                continue
+            txt = _text_at(start, end)
+            chosen.append({
+                "start": float(start), "end": float(end),
+                "title": (txt[:40] or f"Bölüm {i}"),
+                "hook": txt[:60], "reason": "eşit aralık", "score": 0,
+            })
+    return chosen[:max_moments]
+
+
 def detect_moments(
     video_path: Path,
     transcript: Transcript,
@@ -84,17 +149,33 @@ def detect_moments(
     max_moments: int = 3,
     clip_min: int = 15,
     clip_max: int = 60,
+    log=print,
 ) -> list[dict]:
-    """Videodaki en viral olabilecek anları döndürür."""
+    """Videodaki en viral olabilecek anları döndürür.
+
+    Önce Claude ile dener; başarısız olursa ya da an döndürmezse ses enerjisi
+    tabanlı yedek seçime düşer — böylece her durumda klip üretilir.
+    """
     energies = _extract_audio_energy(video_path, tmp_dir)
     hint = _energy_hint(energies)
     lines = _transcript_lines(transcript)
 
-    return find_viral_moments(
-        transcript_lines=lines,
-        energy_hint=hint,
-        video_duration=duration,
-        max_moments=max_moments,
-        clip_min=clip_min,
-        clip_max=clip_max,
-    )
+    moments: list[dict] = []
+    try:
+        moments = find_viral_moments(
+            transcript_lines=lines,
+            energy_hint=hint,
+            video_duration=duration,
+            max_moments=max_moments,
+            clip_min=clip_min,
+            clip_max=clip_max,
+        )
+    except Exception as e:  # noqa: BLE001
+        log(f"  ! Claude an seçimi başarısız ({e}); yedek seçim kullanılacak.")
+
+    if not moments:
+        log("  Ses enerjisi tabanlı yedek an seçimi kullanılıyor.")
+        moments = _fallback_moments(
+            energies, transcript, duration, max_moments, clip_min, clip_max
+        )
+    return moments

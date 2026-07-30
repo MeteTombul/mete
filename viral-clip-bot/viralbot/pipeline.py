@@ -92,6 +92,7 @@ def _process_video(
     mmts = moments_mod.detect_moments(
         src, transcript, duration, work,
         max_moments=moments_per_video, clip_min=clip_min, clip_max=clip_max,
+        log=log,
     )
     log(f"{tag} {len(mmts)} an bulundu.")
 
