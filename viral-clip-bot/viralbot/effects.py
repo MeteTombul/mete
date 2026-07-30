@@ -45,6 +45,36 @@ def probe_duration(path: Path) -> float:
     return float(result.stdout.strip())
 
 
+def probe_resolution(path: Path, max_side: int = 1920) -> tuple[int, int]:
+    """Videonun (genişlik, yükseklik) çözünürlüğünü döndürür.
+
+    En uzun kenar `max_side`'ı aşarsa oranı koruyarak küçültür ve boyutları
+    çift sayıya yuvarlar (H.264/yuv420p için gerekli).
+    """
+    result = subprocess.run(
+        [
+            "ffprobe", "-v", "error",
+            "-select_streams", "v:0",
+            "-show_entries", "stream=width,height",
+            "-of", "csv=s=x:p=0",
+            str(path),
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    w_str, h_str = result.stdout.strip().split("x")
+    w, h = int(w_str), int(h_str)
+    longest = max(w, h)
+    if longest > max_side:
+        scale = max_side / longest
+        w = int(w * scale)
+        h = int(h * scale)
+    w -= w % 2
+    h -= h % 2
+    return max(2, w), max(2, h)
+
+
 def render_clip(
     source: Path,
     ass_path: Path,

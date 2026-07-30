@@ -207,3 +207,136 @@ def translate_segments(texts: list[str], target: str) -> list[str]:
     if len(out) < len(texts):
         out = out + texts[len(out):]
     return out[: len(texts)]
+
+
+# --- Meme editör: araya meme/efekt sokma noktalarını Claude ile planla ---
+
+MEME_INSERT_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "insertions": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "time": {
+                        "type": "number",
+                        "description": "Meme'in videoya sokulacağı an (saniye). "
+                        "Bir cümlenin/vurgunun hemen BİTİMİNE denk gelmeli.",
+                    },
+                    "style": {
+                        "type": "string",
+                        "enum": ["freeze", "zoom", "funny"],
+                        "description": "freeze: dramatik donmuş kare (gerilim/şaşkınlık). "
+                        "zoom: ani zoom-punch (vurgu). funny: parlak komik pop.",
+                    },
+                    "category": {
+                        "type": "string",
+                        "description": "Meme'in duygusu/kategorisi (kütüphane eşleştirmesi için): "
+                        "ör. sok, kahkaha, dusun, sus, alkis, hayir, wow.",
+                    },
+                    "text": {
+                        "type": "string",
+                        "description": "Ekrana basılacak KISA, iri, tümü BÜYÜK HARF Türkçe meme "
+                        "yazısı (en fazla 4-5 kelime). Emoji kullanma.",
+                    },
+                    "sound": {
+                        "type": "string",
+                        "enum": ["boom", "ding", "airhorn", "whoosh", "none"],
+                        "description": "Meme anında çalacak ses efekti.",
+                    },
+                    "duration": {
+                        "type": "number",
+                        "description": "Meme'in ekranda kalacağı süre (saniye, 0.8-2.5 arası).",
+                    },
+                    "reason": {
+                        "type": "string",
+                        "description": "Bu ana neden meme konduğunun kısa Türkçe açıklaması.",
+                    },
+                },
+                "required": ["time", "style", "category", "text", "sound", "duration", "reason"],
+                "additionalProperties": False,
+            },
+        }
+    },
+    "required": ["insertions"],
+    "additionalProperties": False,
+}
+
+
+def plan_meme_insertions(
+    transcript_lines: str,
+    energy_hint: str,
+    scene_hint: str,
+    video_duration: float,
+    max_inserts: int = 8,
+    library_tags: str = "",
+) -> list[dict]:
+    """Videonun akışına göre araya meme/efekt sokulacak anları planlar.
+
+    Dönen her öğe: {time, style, category, text, sound, duration, reason}
+    """
+    client = _client()
+
+    system = (
+        "Sen TikTok/YouTube/Instagram tarzı komik 'meme edit' yapan bir video editörüsün. "
+        "Sana uzun bir videonun zaman damgalı dökümü, saniye bazlı ses enerjisi ve sahne "
+        "kesimleri verilir. Görevin: izleyiciyi güldürecek/şaşırtacak şekilde videonun "
+        "AKIŞINI BOZMADAN, uygun anların hemen ardına kısa meme/efekt sokmak.\n"
+        "İyi bir sokma anı: bir cümlenin çarpıcı bitişi, komik/absürt bir ifade, ani sessizlik, "
+        "şaşırtıcı bilgi, gerilim ya da 'kayıt durur' türü anlardır.\n"
+        "Kurallar: meme'leri anların BİTİMİNE koy (cümle ortasına değil). Aynı anlara yığma; "
+        "sokmalar en az 4-5 saniye aralıklı olsun. Yazılar KISA ve BÜYÜK HARF Türkçe olsun. "
+        "Videoyu meme'e boğma — sadece gerçekten güçlü anları seç."
+    )
+
+    lib = (
+        f"\n=== KULLANILABİLİR MEME KÜTÜPHANE ETİKETLERİ ===\n{library_tags}\n"
+        "Uygun olduğunda 'category' alanını bu etiketlere yakın seç.\n"
+        if library_tags.strip()
+        else ""
+    )
+
+    user = (
+        f"Video süresi: {video_duration:.0f} saniye.\n\n"
+        f"En fazla {max_inserts} adet meme/efekt sokma noktası seç, zamana göre sıralı ver.\n"
+        f"{lib}\n"
+        "=== ZAMAN DAMGALI DÖKÜM ===\n"
+        f"{transcript_lines}\n\n"
+        "=== SANİYE BAZLI SES ENERJİSİ (yüksek = coşku/vurgu/gürültü) ===\n"
+        f"{energy_hint}\n\n"
+        "=== SAHNE KESİMLERİ (saniye) ===\n"
+        f"{scene_hint}\n"
+    )
+
+    resp = client.messages.create(
+        model=MODEL,
+        max_tokens=4000,
+        thinking={"type": "adaptive"},
+        system=system,
+        messages=[{"role": "user", "content": user}],
+        output_config={"format": {"type": "json_schema", "schema": MEME_INSERT_SCHEMA}},
+    )
+
+    text = next((b.text for b in resp.content if b.type == "text"), "{}")
+    data = json.loads(text)
+    inserts = data.get("insertions", [])
+
+    cleaned: list[dict] = []
+    for it in inserts:
+        t = max(0.3, min(video_duration - 0.3, float(it["time"])))
+        dur = float(it.get("duration", 1.4))
+        dur = max(0.6, min(2.5, dur))
+        cleaned.append({**it, "time": t, "duration": dur})
+
+    cleaned.sort(key=lambda x: x["time"])
+
+    # Çok yakın sokmaları ele (en az 4 sn aralık)
+    spaced: list[dict] = []
+    last_t = -999.0
+    for it in cleaned:
+        if it["time"] - last_t < 4.0:
+            continue
+        spaced.append(it)
+        last_t = it["time"]
+    return spaced[:max_inserts]
