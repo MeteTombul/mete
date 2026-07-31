@@ -22,9 +22,11 @@ def download_video(url: str, out_dir: Path, max_height: int = 1080) -> Path:
         "no_color": True,
         "noprogress": True,
         "outtmpl": outtmpl,
+        # Platformdan bağımsız (YouTube/Twitch/Kick HLS dâhil): yüksekliği sınırla,
+        # ext kısıtı koyma; çıktı mp4'e birleştirilir.
         "format": (
-            f"bestvideo[height<={max_height}][ext=mp4]+bestaudio[ext=m4a]/"
-            f"best[height<={max_height}][ext=mp4]/best"
+            f"bestvideo[height<={max_height}]+bestaudio/"
+            f"best[height<={max_height}]/best"
         ),
         "merge_output_format": "mp4",
     }

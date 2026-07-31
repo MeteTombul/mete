@@ -89,23 +89,31 @@ python -m viralbot "https://www.youtube.com/watch?v=VIDEO_ID"
 > Kanal linki mi yoksa tek video linki mi verdiğin **otomatik algılanır**. Tek video için
 > `--moments` ile o videodan kaç klip çıkacağını ayarlayabilirsin (ör. `--moments 5`).
 
-### Kick desteği
+### Çok platform: YouTube · Twitch · Kick
 
-YouTube'un yanı sıra **Kick** de desteklenir:
+Aynı kutuya farklı platformların linkini yapıştırabilirsin; kanal mı tek video mu
+olduğu otomatik algılanır:
 
 ```bash
-# Tek Kick VOD/klip (en güvenilir yol):
-python -m viralbot "https://kick.com/video/VOD_UUID"
+# Kanal (en çok izlenenleri işler)
+python -m viralbot "https://www.youtube.com/@KANAL"
+python -m viralbot "https://www.twitch.tv/YAYINCI"      # Twitch VOD'ları
+python -m viralbot "https://kick.com/YAYINCI"           # Kick VOD'ları (en iyi çaba)
 
-# Kick kanalı (en iyi çaba — Kick her zaman liste vermez):
-python -m viralbot "https://kick.com/YAYINCI_ADI"
+# Tek video / VOD / klip (her platformda en güvenilir yol)
+python -m viralbot "https://www.youtube.com/watch?v=..."
+python -m viralbot "https://www.twitch.tv/videos/123456789"
+python -m viralbot "https://kick.com/video/VOD_UUID"
 ```
 
-- **Tek VOD/klip linki** her zaman çalışır (`kick.com/video/...`).
-- **Kanal linki** için Kick API'sinden VOD listesi çekilmeye çalışılır; Kick engellerse
-  uygulama sana "tek bir VOD linki yapıştır" der.
-- ⚠️ Başkasının yayınını izinsiz alıp yeniden yayınlamak Kick'te de telif/kural sorunu
-  olabilir — kendi veya izinli içerikle kullan.
+- **Twitch:** kanal linki VOD'ları listeler; tek VOD (`twitch.tv/videos/ID`) ve klip
+  (`clips.twitch.tv/...`) doğrudan işlenir.
+- **Kick:** tek VOD/klip (`kick.com/video/...`) her zaman çalışır; kanal listesi Kick
+  API'sinden çekilmeye çalışılır, engellenirse tek VOD linki yapıştır.
+- **İndirme motoru güncel olmalı:** Kick/Twitch desteği `yt-dlp`'de sık güncellenir.
+  İndirme sorunlarında **`Guncelle.bat`**'a çift tıklayıp yt-dlp'yi güncelle.
+- ⚠️ Başkasının yayınını izinsiz alıp yeniden yayınlamak telif/kural sorunu olabilir —
+  kendi veya izinli içerikle kullan.
 
 Seçenekler:
 

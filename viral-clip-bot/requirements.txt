@@ -1,5 +1,6 @@
 anthropic>=0.40.0
-yt-dlp>=2024.1.0
+# yt-dlp: Kick/Twitch/YouTube indirme motoru — güncel tutun (Guncelle.bat)
+yt-dlp>=2024.11.0
 faster-whisper>=1.0.0
 python-dotenv>=1.0.0
 
