@@ -87,7 +87,7 @@ INDEX_HTML = """
  </div>
 </div>
 
-<form method="post" action="{{ url_for('start') }}">
+<form id="jobForm">
  <label>Kanal URL'si veya tek video linki</label>
  <input name="channel_url" placeholder="youtube.com/@kanal · youtube.com/watch?v=... · kick.com/yayinci · kick.com/video/..." required>
  <small style="color:#94a3b8">YouTube kanal/video ya da Kick kanal/VOD linki. Kanal linki: en çok
@@ -155,20 +155,51 @@ INDEX_HTML = """
    hemen yayınlanır.</small>
  </div>
 
- <button {{ 'disabled' if running }}>Başlat</button>
+ <button id="startBtn" type="submit">Başlat</button>
+ <button id="clearBtn" type="button"
+   style="background:#334155;color:#e2e8f0">Log'u temizle</button>
 </form>
 
 <div class="card">
- <b>Durum:</b> {{ 'çalışıyor…' if running else 'boşta' }}
+ <b>Durum:</b> <span id="statusText">{{ 'çalışıyor…' if running else 'hazır' }}</span>
  &nbsp;·&nbsp; <a href="{{ url_for('clips_page') }}">Üretilen klipler →</a>
  <pre id="logs">{{ logs }}</pre>
 </div>
 
 <script>
- setInterval(async ()=>{
-   const r = await fetch('{{ url_for("status") }}'); const d = await r.json();
-   document.getElementById('logs').textContent = d.logs.join('\\n');
- }, 1500);
+ const form = document.getElementById('jobForm');
+ const startBtn = document.getElementById('startBtn');
+ const clearBtn = document.getElementById('clearBtn');
+ const statusText = document.getElementById('statusText');
+ const logsEl = document.getElementById('logs');
+
+ form.addEventListener('submit', async (e) => {
+   e.preventDefault();
+   startBtn.disabled = true;
+   statusText.textContent = 'başlatılıyor…';
+   const r = await fetch('{{ url_for("start") }}', { method: 'POST', body: new FormData(form) });
+   const d = await r.json().catch(() => ({}));
+   if (d && d.ok === false) { statusText.textContent = d.error || 'zaten çalışıyor'; }
+   poll();
+ });
+
+ clearBtn.addEventListener('click', async () => {
+   await fetch('{{ url_for("clear_logs") }}', { method: 'POST' });
+   logsEl.textContent = '';
+ });
+
+ async function poll() {
+   try {
+     const r = await fetch('{{ url_for("status") }}');
+     const d = await r.json();
+     logsEl.textContent = d.logs.join('\\n');
+     logsEl.scrollTop = logsEl.scrollHeight;
+     startBtn.disabled = d.running;
+     statusText.textContent = d.running ? 'çalışıyor…' : 'hazır (yeni işlem yapabilirsin)';
+   } catch (e) {}
+ }
+ setInterval(poll, 1500);
+ poll();
 </script>
 </body></html>
 """
@@ -228,7 +259,7 @@ def index():
 def start():
     with _lock:
         if _job["running"]:
-            return redirect(url_for("index"))
+            return jsonify(ok=False, error="Bir işlem zaten çalışıyor")
         _job["running"] = True
         _job["logs"] = []
         _job["results"] = []
@@ -283,13 +314,21 @@ def start():
                 _job["running"] = False
 
     threading.Thread(target=job, daemon=True).start()
-    return redirect(url_for("index"))
+    return jsonify(ok=True)
 
 
 @app.route("/status")
 def status():
     with _lock:
         return jsonify(running=_job["running"], logs=_job["logs"][-200:])
+
+
+@app.route("/clear-logs", methods=["POST"])
+def clear_logs():
+    with _lock:
+        if not _job["running"]:
+            _job["logs"] = []
+    return jsonify(ok=True)
 
 
 TIKTOK_SETUP_HTML = """
