@@ -232,6 +232,61 @@ Tokenlar `--secrets-dir` (vars. `cikti/secrets`) klasöründen okunur.
 - **Maliyet:** Yalnızca "viral an seçimi" adımı Claude API kullanır (video başına 1 istek). Altyazı ve video işleme tamamen yereldir.
 - **API anahtarı:** `ANTHROPIC_API_KEY` ortam değişkeni veya `ant auth login` profili otomatik okunur.
 
+## 😂 Meme editör — araya otomatik meme/efekt ekleme
+
+Elindeki **tek bir videoyu** (yerel dosya **veya** YouTube/TikTok/Instagram linki)
+analiz edip, akışını bozmadan **araya meme ve efekt** sokar: dramatik **donmuş kare**,
+ani **zoom-punch**, iri **Türkçe meme yazısı** ve **ses efekti** (boom / airhorn /
+ding / whoosh). Viral klip kesmek yerine, videoyu olduğu gibi tutup **komik "meme edit"**
+haline getirir.
+
+Nasıl çalışır?
+
+```
+Video (dosya veya link)
+   │
+   ├─ 1) faster-whisper ile zaman damgalı döküm
+   ├─ 2) ses enerjisi + sahne kesimleri çıkarılır
+   ├─ 3) Claude en uygun "meme sokma" anlarını seçer
+   │      {zaman, stil, meme yazısı, ses efekti, süre}
+   └─ 4) ffmpeg: kaynak parçalara bölünür, uygun anların ardına
+          meme "interstitial"leri eklenir ve hepsi birleştirilir
+```
+
+**Dışarıdan hiç meme dosyası gerekmez** — meme yazısını Claude üretir, görsel/ses
+efektini ffmpeg basar. İstersen **kendi meme kütüphaneni** de kullanabilirsin.
+
+```bash
+# Yerel video
+python -m viralbot.meme_cli video.mp4
+
+# Link (otomatik indirir) + çıktı adı + en fazla 10 meme
+python -m viralbot.meme_cli "https://www.youtube.com/watch?v=..." -o cikti/meme.mp4 --max 10
+
+# Kendi meme kütüphanenle
+python -m viralbot.meme_cli video.mp4 --library memelerim/
+```
+
+Çıktı: `<video>_meme.mp4` (düzenlenmiş video) ve `<video>_meme.meme.json`
+(sokulan tüm meme'lerin zaman/stil/yazı özeti).
+
+### Kendi meme kütüphanen (opsiyonel)
+
+Kategoriye göre eşleştirilen görseller ve ses efekti override'ları:
+
+```
+memelerim/
+├─ gorseller/   sok_wow.png   kahkaha.gif   ...   (dosya adı = etiketler)
+├─ sesler/      boom.wav  airhorn.mp3  ding.wav  whoosh.wav
+└─ manifest.json   (opsiyonel: {"sok_wow.png": ["sok","wow"]})
+```
+
+Claude'un seçtiği `category`, kütüphane etiketleriyle eşleştirilir; uygun bir görsel
+bulunursa donmuş karenin üzerine bindirilir, uygun ses varsa sentezlenen efekt yerine
+o çalınır. Kütüphane yoksa her şey otomatik üretilir.
+
+> Yalnızca **izinli / telifsiz / kendi** içeriğin üzerinde kullan.
+
 ## Modüller
 
 | Dosya | Görev |
@@ -239,7 +294,10 @@ Tokenlar `--secrets-dir` (vars. `cikti/secrets`) klasöründen okunur.
 | `channel.py` | Kanal videolarını listeler, izlenmeye göre sıralar |
 | `download.py` | Videoyu indirir |
 | `transcribe.py` | Whisper ile zaman damgalı altyazı |
-| `claude_client.py` | Claude ile viral an seçimi + SEO metası (JSON şemalı) |
+| `claude_client.py` | Claude ile viral an seçimi + SEO metası + meme sokma planı (JSON şemalı) |
+| `meme_editor.py` | Videoyu analiz edip araya meme/efekt sokan editör (ffmpeg) |
+| `meme_library.py` | Kullanıcının kendi meme görselleri + ses efekti kütüphanesi |
+| `meme_cli.py` | Meme editör komut satırı arayüzü (`python -m viralbot.meme_cli`) |
 | `moments.py` | Ses enerjisi ölçümü + Claude analizini birleştirir |
 | `scenes.py` | Sahne değişimi tespiti ve klip sınırlarını hizalama |
 | `subtitles.py` | Karaoke/düz ASS altyazı + SRT dışa aktarımı |
