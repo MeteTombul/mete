@@ -125,6 +125,14 @@
   .img-thumb .cover { position: absolute; left: 0; right: 0; bottom: 0; text-align: center; font-size: 0.62rem; letter-spacing: 1px; text-transform: uppercase; background: linear-gradient(0deg, rgba(56,189,248,0.9), rgba(56,189,248,0)); color: #05263a; font-weight: 700; padding: 6px 0 2px; }
   td .thumb { overflow: hidden; }
   td .thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .chk-inline { display: inline-flex; align-items: center; gap: 8px; font-size: 0.86rem; color: var(--muted); cursor: pointer; margin-bottom: 10px; }
+  .chk-inline input { width: 17px; height: 17px; accent-color: var(--accent); }
+  .sz-grid { display: flex; gap: 8px; flex-wrap: wrap; }
+  .sz-cell { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+  .sz-cell .sl { font-size: 0.72rem; font-weight: 700; color: var(--muted); letter-spacing: .5px; }
+  .sz-cell input { width: 56px; padding: 8px 6px; text-align: center; }
+  .sz-cell.tot { margin-left: auto; justify-content: center; background: var(--bg-soft); border: 1px solid var(--border); border-radius: 9px; padding: 4px 14px; }
+  .sz-cell.tot b { font-size: 1.1rem; }
 
   .toast-wrap { position: fixed; bottom: 22px; right: 22px; display: flex; flex-direction: column; gap: 10px; z-index: 80; }
   .toast { background: var(--panel-2); border: 1px solid var(--border); border-left: 3px solid var(--green); padding: 12px 18px; border-radius: 10px; font-size: 0.9rem; box-shadow: 0 12px 30px rgba(0,0,0,0.4); animation: toastIn 0.25s ease-out; }
@@ -237,14 +245,14 @@
       { id: 'c3', name: 'Alt Giyim' }, { id: 'c4', name: 'Aksesuar' }
     ],
     products: [
-      { id: 'p1', name: 'Saten Midi Elbise', gender: 'kadin', category: 'c1', price: 899, stock: 12, sku: 'LMS-K-EL-001', desc: 'Zarif saten dokusuyla öne çıkan midi elbise; gündüz şıklığından özel davetlere kadar her anınıza eşlik eder.' },
-      { id: 'p2', name: 'Oversize Triko Kazak', gender: 'kadin', category: 'c2', price: 549, stock: 6, sku: 'LMS-K-UG-014', desc: 'Yumuşacık örgü dokulu, rahat oversize kalıp. Sonbahar kombinlerinizin zarif tamamlayıcısı.' },
-      { id: 'p3', name: 'Yüksek Bel Palazzo Pantolon', gender: 'kadin', category: 'c3', price: 649, stock: 8, sku: 'LMS-K-AG-022', desc: 'Dökümlü kumaşı ve yüksek beliyle zarif bir duruş sunan, gün boyu rahat palazzo pantolon.' },
-      { id: 'p4', name: 'Altın Kaplama Kolye', gender: 'kadin', category: 'c4', price: 299, stock: 20, sku: 'LMS-K-AK-003', desc: 'İnce işçilikli, altın kaplama minimal kolye; günlük şıklığınıza zarif bir dokunuş katar.' },
-      { id: 'p5', name: 'Slim Fit Gömlek', gender: 'erkek', category: 'c2', price: 499, stock: 15, sku: 'LMS-E-UG-101', desc: 'Modern slim fit kalıp ve nefes alan kumaş. Ofisten davete kadar rahatça taşıyabileceğiniz zamansız bir parça.' },
-      { id: 'p6', name: 'Keten Pantolon', gender: 'erkek', category: 'c3', price: 599, stock: 10, sku: 'LMS-E-AG-108', desc: 'Serin tutan keten kumaşı ve rahat kesimiyle yazlık kombinlerin şık ve konforlu tamamlayıcısı.' },
-      { id: 'p7', name: 'Bomber Mont', gender: 'erkek', category: 'c2', price: 1249, stock: 5, sku: 'LMS-E-UG-115', desc: 'Dinç ve modern duruşuyla bomber mont; günlük stilinize güçlü bir hava katar.' },
-      { id: 'p8', name: 'Hakiki Deri Kemer', gender: 'erkek', category: 'c4', price: 349, stock: 18, sku: 'LMS-E-AK-104', desc: 'Hakiki deriden üretilen, dayanıklı ve şık kemer; her kombini özenle tamamlar.' }
+      { id: 'p1', name: 'Saten Midi Elbise', gender: 'kadin', category: 'c1', price: 899, sized: true, sizes: {S:2,M:4,L:3,XL:2,'2XL':1,'3XL':0}, sku: 'LMS-K-EL-001', desc: 'Zarif saten dokusuyla öne çıkan midi elbise; gündüz şıklığından özel davetlere kadar her anınıza eşlik eder.' },
+      { id: 'p2', name: 'Oversize Triko Kazak', gender: 'kadin', category: 'c2', price: 549, sized: true, sizes: {S:1,M:2,L:2,XL:1,'2XL':0,'3XL':0}, sku: 'LMS-K-UG-014', desc: 'Yumuşacık örgü dokulu, rahat oversize kalıp. Sonbahar kombinlerinizin zarif tamamlayıcısı.' },
+      { id: 'p3', name: 'Yüksek Bel Palazzo Pantolon', gender: 'kadin', category: 'c3', price: 649, sized: true, sizes: {S:1,M:2,L:2,XL:2,'2XL':1,'3XL':0}, sku: 'LMS-K-AG-022', desc: 'Dökümlü kumaşı ve yüksek beliyle zarif bir duruş sunan, gün boyu rahat palazzo pantolon.' },
+      { id: 'p4', name: 'Altın Kaplama Kolye', gender: 'kadin', category: 'c4', price: 299, sized: false, stock: 20, sku: 'LMS-K-AK-003', desc: 'İnce işçilikli, altın kaplama minimal kolye; günlük şıklığınıza zarif bir dokunuş katar.' },
+      { id: 'p5', name: 'Slim Fit Gömlek', gender: 'erkek', category: 'c2', price: 499, sized: true, sizes: {S:2,M:5,L:5,XL:2,'2XL':1,'3XL':0}, sku: 'LMS-E-UG-101', desc: 'Modern slim fit kalıp ve nefes alan kumaş. Ofisten davete kadar rahatça taşıyabileceğiniz zamansız bir parça.' },
+      { id: 'p6', name: 'Keten Pantolon', gender: 'erkek', category: 'c3', price: 599, sized: true, sizes: {S:1,M:3,L:3,XL:2,'2XL':1,'3XL':0}, sku: 'LMS-E-AG-108', desc: 'Serin tutan keten kumaşı ve rahat kesimiyle yazlık kombinlerin şık ve konforlu tamamlayıcısı.' },
+      { id: 'p7', name: 'Bomber Mont', gender: 'erkek', category: 'c2', price: 1249, sized: true, sizes: {S:0,M:2,L:2,XL:1,'2XL':0,'3XL':0}, sku: 'LMS-E-UG-115', desc: 'Dinç ve modern duruşuyla bomber mont; günlük stilinize güçlü bir hava katar.' },
+      { id: 'p8', name: 'Hakiki Deri Kemer', gender: 'erkek', category: 'c4', price: 349, sized: false, stock: 18, sku: 'LMS-E-AK-104', desc: 'Hakiki deriden üretilen, dayanıklı ve şık kemer; her kombini özenle tamamlar.' }
     ],
     orders: [],
     customers: []
@@ -291,6 +299,9 @@
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
   const catName = (id) => (db.categories.find(c => c.id === id) || {}).name || '—';
   const can = (page) => me && ACCESS[page] && ACCESS[page].includes(me.role);
+  const SIZES = ['S','M','L','XL','2XL','3XL'];
+  const pStock = (p) => p.sized ? SIZES.reduce((s,k)=>s+(Number(p.sizes && p.sizes[k])||0),0) : (Number(p.stock)||0);
+  const sizeBreak = (p) => p.sized ? SIZES.filter(k=>Number(p.sizes&&p.sizes[k])>0).map(k=>k+':'+p.sizes[k]).join('  ') : '';
 
   function toast(msg, err) {
     const el = document.createElement('div');
@@ -375,11 +386,11 @@
 
   /* ---------------- DASHBOARD ---------------- */
   pages.dashboard = function () {
-    const totalStock = db.products.reduce((s, p) => s + Number(p.stock || 0), 0);
+    const totalStock = db.products.reduce((s, p) => s + pStock(p), 0);
     const revenue = db.orders.filter(o => o.status !== 'iptal').reduce((s, o) => s + Number(o.total || 0), 0);
     const prep = db.orders.filter(o => o.status === 'hazirlaniyor').length;
-    const low = db.products.filter(p => p.stock > 0 && p.stock <= db.settings.lowStock).length;
-    const out = db.products.filter(p => Number(p.stock) === 0).length;
+    const low = db.products.filter(p => pStock(p) > 0 && pStock(p) <= db.settings.lowStock).length;
+    const out = db.products.filter(p => pStock(p) === 0).length;
     const c = document.getElementById('pageContent');
     c.innerHTML = `
       <div class="stat-grid">
@@ -465,7 +476,7 @@
             <td>${genderBadge(p.gender)}</td>
             <td><span class="badge cat">${esc(catName(p.category))}</span></td>
             <td class="price">${money(p.price)}</td>
-            <td>${stockBadge(p.stock)}</td>
+            <td>${stockBadge(pStock(p))}${p.sized ? `<div class="pc" style="color:var(--muted-2);font-size:.72rem;margin-top:3px">${esc(sizeBreak(p) || 'beden yok')}</div>` : ''}</td>
             <td><div class="row-actions"><button class="icon-btn" data-edit="${p.id}">✏️</button><button class="icon-btn del" data-del="${p.id}">🗑️</button></div></td>
           </tr>`).join('')}</tbody>
       </table></div>`;
@@ -479,7 +490,7 @@
   }
   function productModal(id) {
     const p = id ? db.products.find(x => x.id === id)
-      : { name: '', gender: 'kadin', category: db.categories[0] && db.categories[0].id, price: '', stock: '', sku: '', desc: '', images: [] };
+      : { name: '', gender: 'kadin', category: db.categories[0] && db.categories[0].id, price: '', sized: true, sizes: {}, stock: '', sku: '', desc: '', images: [] };
     openModal(`${id ? 'Ürünü Düzenle' : 'Yeni Ürün'}`, `
       <div class="form-grid">
         <div class="field full"><label>Ürün adı</label><input class="input" id="f_name" value="${esc(p.name)}" placeholder="Ör. Saten Midi Elbise"></div>
@@ -491,7 +502,15 @@
         </div>
         <div class="field"><label>SKU / Kod</label><input class="input" id="f_sku" value="${esc(p.sku)}" placeholder="LMS-001"></div>
         <div class="field"><label>Fiyat (${db.settings.currency}) — kargo dahil</label><input class="input" id="f_price" type="number" min="0" step="0.01" value="${esc(p.price)}"></div>
-        <div class="field"><label>Stok adedi</label><input class="input" id="f_stock" type="number" min="0" step="1" value="${esc(p.stock)}"></div>
+        <div class="field full">
+          <label>Stok</label>
+          <label class="chk-inline"><input type="checkbox" id="f_sized" ${p.sized ? 'checked' : ''}> Bedenli ürün (S–3XL) · kapatırsan tek stok girilir</label>
+          <div class="sz-grid" id="sizeGrid">
+            ${SIZES.map(sz => `<div class="sz-cell"><span class="sl">${sz}</span><input class="input" type="number" min="0" step="1" data-sz="${sz}" value="${esc((p.sizes && p.sizes[sz]) || '')}"></div>`).join('')}
+            <div class="sz-cell tot"><span class="sl">Toplam</span><b id="szTotal">0</b></div>
+          </div>
+          <div id="singleStock" style="display:none;max-width:200px"><input class="input" type="number" min="0" step="1" id="f_stock" placeholder="Stok adedi" value="${esc(p.sized ? '' : p.stock)}"></div>
+        </div>
         <div class="field full">
           <label>Ürün Fotoğrafları</label>
           <div class="img-row" id="imgRow"></div>
@@ -512,12 +531,18 @@
       () => {
         const name = document.getElementById('f_name').value.trim();
         if (!name) { toast('Ürün adı zorunlu', true); return false; }
+        const sized = document.getElementById('f_sized').checked;
+        const sizes = {};
+        document.querySelectorAll('#sizeGrid [data-sz]').forEach(inp => { sizes[inp.dataset.sz] = Math.max(0, parseInt(inp.value) || 0); });
+        const singleStock = Math.max(0, parseInt((document.getElementById('f_stock') || {}).value) || 0);
         const data = {
           name, gender: document.getElementById('f_gender').value,
           category: document.getElementById('f_cat').value,
           sku: document.getElementById('f_sku').value.trim(),
           price: Number(document.getElementById('f_price').value) || 0,
-          stock: Number(document.getElementById('f_stock').value) || 0,
+          sized,
+          sizes: sized ? sizes : {},
+          stock: sized ? SIZES.reduce((s,k)=>s+sizes[k],0) : singleStock,
           desc: document.getElementById('f_desc').value.trim(),
           images: imgs.slice()
         };
@@ -542,6 +567,17 @@
       for (const f of files) { try { imgs.push(await fileToResizedDataURL(f)); } catch (_) {} }
       e.target.value = ''; drawImgs();
     });
+
+    // beden / stok davranışı
+    const sizedChk = document.getElementById('f_sized');
+    const sizeGrid = document.getElementById('sizeGrid');
+    const singleStock = document.getElementById('singleStock');
+    const szTotalEl = document.getElementById('szTotal');
+    function updSzTotal(){ let t=0; sizeGrid.querySelectorAll('[data-sz]').forEach(x=>t+=Math.max(0,parseInt(x.value)||0)); szTotalEl.textContent=t; }
+    function applySized(){ const on=sizedChk.checked; sizeGrid.style.display=on?'flex':'none'; singleStock.style.display=on?'none':'block'; }
+    sizedChk.addEventListener('change', applySized);
+    sizeGrid.querySelectorAll('[data-sz]').forEach(x=>x.addEventListener('input',updSzTotal));
+    applySized(); updSzTotal();
 
     // açıklama modu davranışı
     const seg = document.getElementById('descSeg');
@@ -619,7 +655,7 @@
       </div>
       <div class="table-wrap" style="margin-top:14px"><table>
         <thead><tr><th>Ürün</th><th>Adet</th><th>Fiyat</th></tr></thead>
-        <tbody>${lines.length ? lines.map(l => `<tr><td>${esc(l.name)}</td><td>${l.qty}</td><td>${money(l.price * l.qty)}</td></tr>`).join('') : `<tr><td colspan="3" style="color:var(--muted-2)">Ürün dökümü yok</td></tr>`}
+        <tbody>${lines.length ? lines.map(l => `<tr><td>${esc(l.name)}${l.size ? ` · <b>${esc(l.size)}</b>` : ''}</td><td>${l.qty}</td><td>${money(l.price * l.qty)}</td></tr>`).join('') : `<tr><td colspan="3" style="color:var(--muted-2)">Ürün dökümü yok</td></tr>`}
         <tr><td colspan="2" style="text-align:right"><b>Toplam</b></td><td class="price">${money(o.total)}</td></tr></tbody>
       </table></div>`, null, 'Kapat');
   }
