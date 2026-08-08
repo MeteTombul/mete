@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ürün Kâr Hesaplama</title>
+<style>
+  :root{
+    --bg:#0f172a; --bg2:#1e293b; --card:#131c31; --card2:#182238;
+    --line:#27324a; --text:#e2e8f0; --muted:#94a3b8; --muted2:#64748b;
+    --accent:#38bdf8; --accent2:#a78bfa; --green:#4ade80; --red:#f87171; --amber:#fbbf24;
+    --grad:linear-gradient(90deg,#38bdf8,#a78bfa);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:radial-gradient(circle at 50% -10%,#1e293b,#0f172a);color:var(--text);min-height:100vh;padding:24px 16px 60px;-webkit-font-smoothing:antialiased;}
+  .wrap{width:min(96vw,960px);margin:0 auto;}
+  header{text-align:center;margin-bottom:26px;}
+  h1{font-size:1.7rem;font-weight:800;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:.5px;}
+  header p{color:var(--muted);font-size:.9rem;margin-top:6px;}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;}
+  .card h2{font-size:1.05rem;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+  .fld{margin-bottom:14px;}
+  .fld label{display:block;font-size:.8rem;color:var(--muted);margin-bottom:6px;}
+  .in-wrap{position:relative;}
+  .in-wrap .suf{position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--muted2);font-size:.9rem;pointer-events:none;}
+  input[type=number]{width:100%;padding:12px 40px 12px 14px;background:var(--bg2);border:1px solid var(--line);border-radius:10px;color:var(--text);font-size:1rem;outline:none;transition:border-color .15s,box-shadow .15s;-moz-appearance:textfield;}
+  input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+  input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(56,189,248,.15);}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .chk{display:flex;align-items:center;gap:9px;font-size:.86rem;color:var(--muted);margin-bottom:14px;cursor:pointer;user-select:none;}
+  .chk input{width:18px;height:18px;accent-color:var(--accent);}
+  /* Results */
+  .result{background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px;}
+  .big-kar{text-align:center;padding:8px 0 4px;}
+  .big-kar .lbl{font-size:.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
+  .big-kar .val{font-size:2.4rem;font-weight:800;margin-top:4px;}
+  .big-kar .val.pos{color:var(--green);} .big-kar .val.neg{color:var(--red);}
+  .big-kar .sub{font-size:.85rem;color:var(--muted);margin-top:2px;}
+  .lines{margin-top:6px;}
+  .line{display:flex;justify-content:space-between;padding:8px 0;border-top:1px solid var(--line);font-size:.92rem;}
+  .line:first-child{border-top:none;}
+  .line .k{color:var(--muted);}
+  .line .v{font-weight:600;}
+  .line.total .k,.line.total .v{color:var(--text);font-weight:700;}
+  .pill{display:inline-block;padding:4px 12px;border-radius:999px;font-size:.82rem;font-weight:700;}
+  .pill.green{background:rgba(74,222,128,.15);color:var(--green);}
+  .pill.red{background:rgba(248,113,113,.15);color:var(--red);}
+  .metrics{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:4px;}
+  .metric{background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:12px;text-align:center;}
+  .metric .m-l{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
+  .metric .m-v{font-size:1.3rem;font-weight:800;margin-top:3px;}
+  .hint{font-size:.78rem;color:var(--muted2);margin-top:10px;line-height:1.5;}
+  .suggest-out{text-align:center;padding:14px;background:var(--bg2);border:1px dashed var(--line);border-radius:12px;margin-top:8px;}
+  .suggest-out .s-l{font-size:.8rem;color:var(--muted);}
+  .suggest-out .s-v{font-size:2rem;font-weight:800;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;margin-top:4px;}
+  footer{text-align:center;color:var(--muted2);font-size:.8rem;margin-top:26px;}
+  @media(max-width:760px){.grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>🧮 Ürün Kâr Hesaplama</h1>
+      <p>Alış–satış, komisyon, kargo ve KDV'yi girin; net kârınızı ve marjınızı anında görün.</p>
+    </header>
+
+    <div class="grid">
+      <!-- SOL: Girdi -->
+      <div class="card">
+        <h2>📥 Ürün Bilgileri</h2>
+        <div class="row2">
+          <div class="fld"><label>Alış Fiyatı (maliyet)</label><div class="in-wrap"><input type="number" id="cost" min="0" step="0.01" placeholder="0"><span class="suf">₺</span></div></div>
+          <div class="fld"><label>Satış Fiyatı</label><div class="in-wrap"><input type="number" id="price" min="0" step="0.01" placeholder="0"><span class="suf">₺</span></div></div>
+        </div>
+        <div class="row2">
+          <div class="fld"><label>Komisyon (pazaryeri)</label><div class="in-wrap"><input type="number" id="comm" min="0" step="0.1" placeholder="0"><span class="suf">%</span></div></div>
+          <div class="fld"><label>Kargo Ücreti</label><div class="in-wrap"><input type="number" id="ship" min="0" step="0.01" placeholder="0"><span class="suf">₺</span></div></div>
+        </div>
+        <div class="row2">
+          <div class="fld"><label>Paketleme / Diğer Gider</label><div class="in-wrap"><input type="number" id="other" min="0" step="0.01" placeholder="0"><span class="suf">₺</span></div></div>
+          <div class="fld"><label>KDV Oranı</label><div class="in-wrap"><input type="number" id="kdv" min="0" step="1" placeholder="0"><span class="suf">%</span></div></div>
+        </div>
+        <label class="chk"><input type="checkbox" id="kdvIncl" checked> Satış fiyatına KDV dahil</label>
+        <div class="fld"><label>Adet</label><div class="in-wrap"><input type="number" id="qty" min="1" step="1" value="1"><span class="suf">adet</span></div></div>
+        <div class="hint">Komisyon ve KDV, satış fiyatı üzerinden hesaplanır. Boş bıraktığınız alanlar 0 kabul edilir.</div>
+      </div>
+
+      <!-- SAĞ: Sonuç -->
+      <div class="card">
+        <h2>📊 Sonuç</h2>
+        <div class="result">
+          <div class="big-kar">
+            <div class="lbl">Net Kâr (birim)</div>
+            <div class="val pos" id="karVal">₺0</div>
+            <div class="sub" id="karSub">—</div>
+          </div>
+          <div class="metrics">
+            <div class="metric"><div class="m-l">Kâr Marjı</div><div class="m-v" id="marjVal">%0</div></div>
+            <div class="metric"><div class="m-l">Kâr Oranı (maliyete)</div><div class="m-v" id="oranVal">%0</div></div>
+          </div>
+        </div>
+        <div class="result">
+          <div class="lines">
+            <div class="line"><span class="k">Satış fiyatı</span><span class="v" id="rPrice">₺0</span></div>
+            <div class="line"><span class="k">Alış (maliyet)</span><span class="v" id="rCost">−₺0</span></div>
+            <div class="line"><span class="k">Komisyon</span><span class="v" id="rComm">−₺0</span></div>
+            <div class="line"><span class="k">Kargo</span><span class="v" id="rShip">−₺0</span></div>
+            <div class="line"><span class="k">Paketleme / diğer</span><span class="v" id="rOther">−₺0</span></div>
+            <div class="line"><span class="k">KDV</span><span class="v" id="rKdv">−₺0</span></div>
+            <div class="line total"><span class="k">Net kâr (birim)</span><span class="v" id="rKar">₺0</span></div>
+          </div>
+          <div style="text-align:center;margin-top:12px">
+            <span class="pill green" id="totPill">Toplam (× adet): ₺0</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Önerilen fiyat -->
+    <div class="card" style="margin-top:20px">
+      <h2>🎯 Önerilen Satış Fiyatı</h2>
+      <div class="grid" style="gap:16px">
+        <div>
+          <div class="fld"><label>Hedeflenen Kâr Marjı</label><div class="in-wrap"><input type="number" id="target" min="0" max="99" step="1" placeholder="30"><span class="suf">%</span></div></div>
+          <div class="hint">Yukarıdaki alış fiyatı, kargo, paketleme, komisyon ve KDV'yi kullanır. Girdiğiniz marja ulaşmak için gereken satış fiyatını önerir.</div>
+        </div>
+        <div class="suggest-out">
+          <div class="s-l">Bu marj için satış fiyatı</div>
+          <div class="s-v" id="sugPrice">₺0</div>
+          <div class="hint" id="sugNote" style="margin-top:6px">Hedef marjı girin.</div>
+        </div>
+      </div>
+    </div>
+
+    <footer>Lumas · Ürün Kâr Hesaplama — çevrimdışı çalışır, verileriniz cihazınızdan çıkmaz.</footer>
+  </div>
+
+<script>
+(function(){
+  "use strict";
+  const $ = id => document.getElementById(id);
+  const ids = ['cost','price','comm','ship','other','kdv','qty','target'];
+  const num = id => { const v = parseFloat($(id).value); return isNaN(v) ? 0 : v; };
+  const TL = n => '₺' + (Math.round(n*100)/100).toLocaleString('tr-TR',{minimumFractionDigits:0,maximumFractionDigits:2});
+  const PC = n => '%' + (Math.round(n*10)/10).toLocaleString('tr-TR');
+
+  function calc(){
+    const cost=num('cost'), price=num('price'), comm=num('comm'), ship=num('ship'),
+          other=num('other'), kdv=num('kdv'), qty=Math.max(1, Math.floor(num('qty'))||1),
+          kdvIncl=$('kdvIncl').checked;
+
+    const commTL = price * comm/100;
+    // KDV: dahilse satış içindeki KDV payı; hariçse satış*kdv/100 (devlete ödenecek)
+    const kdvTL = kdv>0 ? (kdvIncl ? price - price/(1+kdv/100) : price*kdv/100) : 0;
+    const giderler = cost + commTL + ship + other + kdvTL;
+    const kar = price - giderler;
+
+    const marj = price>0 ? kar/price*100 : 0;      // satış üzerinden
+    const oran = cost>0 ? kar/cost*100 : 0;         // maliyet üzerinden
+
+    // Büyük kâr
+    const karVal=$('karVal');
+    karVal.textContent = TL(kar);
+    karVal.className = 'val ' + (kar>=0 ? 'pos':'neg');
+    $('karSub').textContent = price>0 ? (kar>=0 ? 'Kârdasınız 🎉' : 'Zarardasınız ⚠️') : 'Satış fiyatı girin';
+
+    $('marjVal').textContent = PC(marj);
+    $('marjVal').style.color = marj>=0 ? 'var(--green)' : 'var(--red)';
+    $('oranVal').textContent = PC(oran);
+    $('oranVal').style.color = oran>=0 ? 'var(--green)' : 'var(--red)';
+
+    // Döküm
+    $('rPrice').textContent = TL(price);
+    $('rCost').textContent = '−'+TL(cost);
+    $('rComm').textContent = '−'+TL(commTL);
+    $('rShip').textContent = '−'+TL(ship);
+    $('rOther').textContent = '−'+TL(other);
+    $('rKdv').textContent = '−'+TL(kdvTL);
+    $('rKar').textContent = TL(kar);
+    $('rKar').style.color = kar>=0 ? 'var(--green)' : 'var(--red)';
+
+    const totPill=$('totPill');
+    totPill.textContent = 'Toplam (× '+qty+' adet): '+TL(kar*qty);
+    totPill.className = 'pill ' + (kar>=0 ? 'green':'red');
+
+    // Önerilen fiyat: price*(1 - comm% - kdvPay - marj%) = cost+ship+other
+    const target = num('target');
+    const fixed = cost + ship + other;
+    const kdvFrac = (kdv>0 && kdvIncl) ? kdv/(100+kdv) : 0; // dahilse fiyatla orantılı pay
+    const kdvExtra = (kdv>0 && !kdvIncl) ? kdv/100 : 0;     // hariçse fiyat*oran
+    const denom = 1 - comm/100 - kdvFrac - kdvExtra - target/100;
+    const sug=$('sugPrice'), note=$('sugNote');
+    if(target<=0){ sug.textContent='₺0'; note.textContent='Hedef marjı girin.'; }
+    else if(denom<=0){ sug.textContent='—'; note.textContent='Bu marj bu komisyon/KDV ile mümkün değil (oranları düşürün).'; }
+    else if(fixed<=0){ sug.textContent='₺0'; note.textContent='Alış fiyatını girin.'; }
+    else { const sp=fixed/denom; sug.textContent=TL(sp); note.textContent='Bu fiyatta net kârınız ≈ '+TL(sp*target/100)+' olur.'; }
+  }
+
+  ids.concat(['qty']).forEach(id=>$(id).addEventListener('input',calc));
+  $('kdvIncl').addEventListener('change',calc);
+  calc();
+})();
+</script>
+</body>
+</html>
