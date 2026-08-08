@@ -122,7 +122,12 @@
   .prod-card:hover { transform: translateY(-5px); box-shadow: var(--shadow); }
   .prod-media { position: relative; aspect-ratio: 3/4; overflow: hidden; background: var(--sand); cursor: pointer; }
   .prod-media .ph { position: absolute; inset: 0; transition: transform .5s ease; }
-  .prod-card:hover .prod-media .ph { transform: scale(1.05); }
+  .prod-media .pimg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; transition: transform .5s ease; }
+  .prod-card:hover .prod-media .ph, .prod-card:hover .prod-media .pimg { transform: scale(1.05); }
+  .pv-cover { width: 100%; height: 260px; object-fit: cover; object-position: center; border-radius: 14px; margin-bottom: 12px; background: var(--sand); }
+  .pv-thumbs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+  .pv-thumbs img { width: 56px; height: 70px; object-fit: cover; object-position: center; border-radius: 8px; cursor: pointer; border: 2px solid transparent; }
+  .pv-thumbs img.on { border-color: var(--gold); }
   .prod-tag { position: absolute; top: 12px; left: 12px; z-index: 2; background: rgba(255,255,255,0.92); color: var(--ink); font-size: 0.66rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; padding: 5px 11px; border-radius: 999px; }
   .prod-tag.out { background: rgba(43,38,34,0.85); color: #fff; }
   .prod-tag.gold { background: var(--gold); color: #fff; }
@@ -463,6 +468,12 @@
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
   const catName = (id) => (db.categories.find(c => c.id === id) || {}).name || '';
   const findProd = (id) => db.products.find(p => p.id === id);
+  const prodImg = (p) => (p && p.images && p.images[0]) ? p.images[0] : null;
+  function mediaHTML(p) {
+    return prodImg(p)
+      ? `<img class="pimg" src="${prodImg(p)}" alt="${esc(p.name)}">`
+      : `<div class="ph" style="${artStyle(p.id)}"><span class="mono">${esc(p.name.charAt(0))}</span></div>`;
+  }
 
   /* ---- placeholder art ---- */
   const palettes = [['#e7d3bf','#c9a888'],['#dcd0e6','#b6a0cf'],['#d9e2e0','#a9c1bd'],['#f0d9d2','#d3a29a'],['#e5ddc9','#c2b58c'],['#d5dbe8','#a7b3cf'],['#efd8c2','#d8b48a'],['#e2d6e0','#bfa4bd']];
@@ -540,7 +551,7 @@
       const acc = p.category === 'c4';
       return `<article class="prod-card">
         <div class="prod-media" data-view="${p.id}">
-          <div class="ph" style="${artStyle(p.id)}"><span class="mono">${esc(p.name.charAt(0))}</span></div>
+          ${mediaHTML(p)}
           ${out ? `<span class="prod-tag out">Tükendi</span>` : (acc ? `<span class="prod-tag gold">Aksesuar</span>` : '')}
           <div class="quick-add"><button class="btn gold block sm" data-add="${p.id}" ${out ? 'disabled' : ''}>${out ? 'Tükendi' : 'Sepete Ekle'}</button></div>
         </div>
@@ -559,10 +570,17 @@
   function viewProduct(id) {
     const p = findProd(id); if (!p) return;
     const out = Number(p.stock) <= 0;
+    const imgs = (p.images || []);
+    const coverHTML = imgs.length
+      ? `<img class="pv-cover" id="pvCover" src="${imgs[0]}" alt="${esc(p.name)}">`
+      : `<div class="ph" style="${artStyle(p.id)}height:220px;border-radius:14px;margin-bottom:12px"><span class="mono">${esc(p.name.charAt(0))}</span></div>`;
+    const thumbsHTML = imgs.length > 1
+      ? `<div class="pv-thumbs">${imgs.map((s, i) => `<img src="${s}" data-i="${i}" class="${i === 0 ? 'on' : ''}" alt="">`).join('')}</div>` : '';
     openModal(`
       <div class="modal-head"><h3>${esc(p.name)}</h3><p>${esc(catName(p.category))} · ${gender === 'erkek' ? 'Erkek' : 'Kadın'}</p></div>
       <div class="modal-body">
-        <div class="ph" style="${artStyle(p.id)}height:200px;border-radius:14px;margin-bottom:16px"><span class="mono">${esc(p.name.charAt(0))}</span></div>
+        ${coverHTML}
+        ${thumbsHTML}
         <p style="color:var(--ink-soft);font-weight:300;margin-bottom:14px">${esc(p.desc || '')}</p>
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
           <div><div style="font-size:1.4rem;font-weight:600;color:var(--gold-d)">${money(p.price)}</div><div style="font-size:.72rem;color:var(--muted)">Kargo dahil</div></div>
@@ -570,6 +588,11 @@
         </div>
         <button class="btn gold block" id="mvAdd" ${out ? 'disabled' : ''}>${out ? 'Tükendi' : 'Sepete Ekle'}</button>
       </div>`, modal => {
+      const cover = modal.querySelector('#pvCover');
+      modal.querySelectorAll('.pv-thumbs img').forEach(t => t.addEventListener('click', () => {
+        if (cover) cover.src = t.src;
+        modal.querySelectorAll('.pv-thumbs img').forEach(x => x.classList.toggle('on', x === t));
+      }));
       const b = modal.querySelector('#mvAdd');
       if (b && !out) b.addEventListener('click', () => { addToCart(id); modal._close(); });
     });
@@ -606,7 +629,7 @@
     items.innerHTML = entries.map(([id, q]) => {
       const p = findProd(id);
       return `<div class="ci">
-        <div class="ci-media"><div class="ph" style="${artStyle(p.id)}"><span class="mono">${esc(p.name.charAt(0))}</span></div></div>
+        <div class="ci-media">${prodImg(p) ? `<img src="${prodImg(p)}" alt="" style="width:100%;height:100%;object-fit:cover;object-position:center">` : `<div class="ph" style="${artStyle(p.id)}"><span class="mono">${esc(p.name.charAt(0))}</span></div>`}</div>
         <div class="ci-info">
           <div class="n">${esc(p.name)}</div><div class="p">${money(p.price)}</div>
           <div class="qty"><button data-dec="${id}">−</button><span>${q}</span><button data-inc="${id}">+</button></div>
