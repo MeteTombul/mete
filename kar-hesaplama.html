@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ürün Kâr Hesaplama</title>
+<style>
+  :root{
+    --bg:#0f172a; --bg2:#1e293b; --card:#131c31; --card2:#182238;
+    --line:#27324a; --text:#e2e8f0; --muted:#94a3b8; --muted2:#64748b;
+    --accent:#38bdf8; --accent2:#a78bfa; --green:#4ade80; --red:#f87171; --amber:#fbbf24;
+    --grad:linear-gradient(90deg,#38bdf8,#a78bfa);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:radial-gradient(circle at 50% -10%,#1e293b,#0f172a);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased;}
+  input,select,button{font-family:inherit;}
+
+  .app{display:grid;grid-template-columns:230px 1fr;min-height:100vh;}
+  .side{background:var(--card);border-right:1px solid var(--line);padding:22px 14px;display:flex;flex-direction:column;gap:6px;position:sticky;top:0;height:100vh;}
+  .logo{font-size:1.15rem;font-weight:800;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:.5px;padding:0 8px;margin-bottom:2px;}
+  .logo small{display:block;font-size:.62rem;letter-spacing:2px;color:var(--muted2);font-weight:600;text-transform:uppercase;-webkit-text-fill-color:var(--muted2);}
+  .tab{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:10px;color:var(--muted);font-weight:600;font-size:.94rem;cursor:pointer;border:none;background:none;text-align:left;width:100%;transition:background .15s,color .15s;}
+  .tab .ic{font-size:1.15rem;width:22px;text-align:center;}
+  .tab:hover{background:var(--card2);color:var(--text);}
+  .tab.active{background:var(--card2);color:var(--text);box-shadow:inset 3px 0 0 var(--accent);}
+  .side-foot{margin-top:auto;font-size:.72rem;color:var(--muted2);padding:8px;line-height:1.5;}
+
+  .main{padding:26px 30px 60px;overflow-x:hidden;}
+  .head{margin-bottom:22px;}
+  .head h1{font-size:1.5rem;font-weight:800;}
+  .head p{color:var(--muted);font-size:.88rem;margin-top:4px;}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:18px;}
+
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:11px 18px;font-size:.9rem;font-weight:700;color:#0f172a;background:var(--grad);border:none;border-radius:10px;cursor:pointer;transition:transform .1s;box-shadow:0 6px 18px rgba(56,189,248,.25);}
+  .btn:hover{transform:translateY(-1px);}
+  .btn.ghost{background:transparent;color:var(--text);border:1px solid var(--line);box-shadow:none;}
+  .btn.ghost:hover{border-color:var(--accent);}
+  .btn.sm{padding:8px 13px;font-size:.82rem;}
+
+  input[type=number],input[type=text]{width:100%;padding:11px 12px;background:var(--bg2);border:1px solid var(--line);border-radius:9px;color:var(--text);font-size:.95rem;outline:none;transition:border-color .15s,box-shadow .15s;}
+  input[type=number]{-moz-appearance:textfield;text-align:right;}
+  input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+  input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(56,189,248,.15);}
+
+  .list{display:flex;flex-direction:column;gap:10px;margin-bottom:16px;}
+  /* gider satırı */
+  .item{display:grid;grid-template-columns:48px 1fr 140px 34px;gap:12px;align-items:center;background:var(--card2);border:1px solid var(--line);border-radius:11px;padding:10px 12px;transition:opacity .15s;}
+  .item.off{opacity:.42;}
+  .amt-wrap{position:relative;}
+  .amt-wrap .suf{position:absolute;right:10px;top:50%;transform:translateY(-50%);color:var(--muted2);font-size:.85rem;pointer-events:none;}
+  .amt-wrap input{padding-right:26px;}
+  .del{width:32px;height:32px;border-radius:8px;background:var(--bg2);border:1px solid var(--line);color:var(--muted);cursor:pointer;font-size:.85rem;}
+  .del:hover{color:var(--red);border-color:var(--red);}
+  .list-head{display:grid;grid-template-columns:48px 1fr 140px 34px;gap:12px;padding:0 12px 4px;font-size:.72rem;color:var(--muted2);text-transform:uppercase;letter-spacing:.5px;}
+  .list-head span:nth-child(3){text-align:right;}
+
+  /* ürün kartı (bedenli) */
+  .pcard{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:12px 14px;transition:opacity .15s;}
+  .pcard.off{opacity:.45;}
+  .pcard-top{display:grid;grid-template-columns:48px 1fr 150px 34px;gap:12px;align-items:center;}
+  .sizes{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1px dashed var(--line);}
+  .size{display:flex;flex-direction:column;align-items:center;gap:5px;}
+  .size .sl{font-size:.72rem;font-weight:700;color:var(--muted);letter-spacing:.5px;}
+  .size input{width:58px;padding:8px 6px;text-align:center;}
+  .size.tot{margin-left:auto;justify-content:center;background:var(--bg2);border:1px solid var(--line);border-radius:9px;padding:4px 14px;}
+  .size.tot .sl{color:var(--accent2);}
+  .size.tot b{font-size:1.15rem;}
+
+  .sw{position:relative;width:42px;height:24px;justify-self:center;}
+  .sw input{opacity:0;width:0;height:0;position:absolute;}
+  .sw label{position:absolute;inset:0;background:var(--line);border-radius:999px;cursor:pointer;transition:.2s;}
+  .sw label::before{content:'';position:absolute;width:18px;height:18px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s;}
+  .sw input:checked + label{background:var(--accent);}
+  .sw input:checked + label::before{transform:translateX(18px);}
+
+  .foot-total{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;background:var(--card2);border:1px solid var(--line);border-radius:11px;font-size:.95rem;}
+  .foot-total b{font-size:1.2rem;}
+  .empty{text-align:center;color:var(--muted2);padding:30px 16px;}
+
+  .profit-box{text-align:center;}
+  .profit-val{font-size:3rem;font-weight:800;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;line-height:1;margin-bottom:4px;}
+  .profit-sub{color:var(--muted);font-size:.85rem;margin-bottom:18px;}
+  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:8px;border-radius:999px;background:linear-gradient(90deg,var(--accent),var(--accent2));outline:none;}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;background:#fff;border:3px solid var(--accent);cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.4);}
+  input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:#fff;border:3px solid var(--accent);cursor:pointer;}
+  .range-ticks{display:flex;justify-content:space-between;color:var(--muted2);font-size:.72rem;margin-top:6px;}
+  .quick-pc{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:14px;}
+  .quick-pc button{padding:7px 14px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--muted);font-size:.82rem;font-weight:600;cursor:pointer;}
+  .quick-pc button:hover,.quick-pc button.on{background:var(--card2);color:var(--text);border-color:var(--accent);}
+  .split-row{display:flex;align-items:center;gap:12px;margin-top:16px;flex-wrap:wrap;justify-content:center;}
+  .split-row label{font-size:.82rem;color:var(--muted);}
+  select{padding:10px 12px;background:var(--bg2);border:1px solid var(--line);border-radius:9px;color:var(--text);font-size:.9rem;outline:none;}
+
+  .table-wrap{overflow-x:auto;border-radius:12px;border:1px solid var(--line);}
+  table{width:100%;border-collapse:collapse;min-width:640px;}
+  th,td{padding:12px 14px;font-size:.9rem;text-align:right;}
+  th:first-child,td:first-child{text-align:left;}
+  thead th{background:var(--card2);color:var(--muted);font-weight:600;font-size:.74rem;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;}
+  tbody tr{border-top:1px solid var(--line);}
+  td.sale{font-weight:800;color:var(--accent);font-size:1.02rem;}
+  td.profit.pos{color:var(--green);font-weight:700;} td.profit.neg{color:var(--red);font-weight:700;}
+  .szmini{color:var(--muted2);font-size:.72rem;font-weight:400;}
+  tfoot td{border-top:2px solid var(--line);background:var(--card2);font-weight:800;}
+
+  .summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-top:18px;}
+  .sum{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:16px;text-align:center;}
+  .sum .s-l{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
+  .sum .s-v{font-size:1.5rem;font-weight:800;margin-top:6px;}
+  .sum .s-v.accent{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .sum .s-v.green{color:var(--green);}
+  .hint{font-size:.78rem;color:var(--muted2);margin-top:6px;line-height:1.5;}
+
+  .menu-btn{display:none;}
+  @media(max-width:820px){
+    .app{grid-template-columns:1fr;}
+    .side{position:fixed;z-index:30;width:230px;height:100vh;transform:translateX(-100%);transition:transform .22s;}
+    .side.open{transform:translateX(0);}
+    .menu-btn{display:inline-flex;margin-bottom:14px;}
+    .scrim{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:25;}
+    .item,.list-head{grid-template-columns:44px 1fr 110px 32px;gap:8px;}
+    .pcard-top{grid-template-columns:44px 1fr 120px 32px;gap:8px;}
+    .size input{width:48px;}
+  }
+</style>
+</head>
+<body>
+  <div class="app">
+    <aside class="side" id="side">
+      <div class="logo">🧮 KÂR HESAP<small>Ürün Kârı</small></div>
+      <button class="tab" data-tab="gider"><span class="ic">📉</span> Gider</button>
+      <button class="tab" data-tab="urunler"><span class="ic">📦</span> Ürünler</button>
+      <button class="tab" data-tab="hesap"><span class="ic">🧮</span> Hesaplama</button>
+      <div class="side-foot">Çevrimdışı çalışır.<br>Verileriniz cihazınızda saklanır.</div>
+    </aside>
+    <div class="scrim" id="scrim" style="display:none"></div>
+
+    <main class="main">
+      <button class="btn ghost sm menu-btn" id="menuBtn">☰ Menü</button>
+      <div class="head" id="head"><h1>Gider</h1><p>—</p></div>
+      <div id="panel"></div>
+    </main>
+  </div>
+
+<script>
+(function(){
+  "use strict";
+  const $ = s => document.querySelector(s);
+  const KEY = 'lumas_kar_hesap_v2';
+  const SIZES = ['S','M','L','XL','2XL','3XL'];
+  const TL = n => '₺' + (Math.round((n||0)*100)/100).toLocaleString('tr-TR',{minimumFractionDigits:0,maximumFractionDigits:2});
+  const PC = n => '%' + (Math.round((n||0)*10)/10).toLocaleString('tr-TR');
+  const esc = s => String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+  let state = load();
+  function load(){
+    let s;
+    try{ s=JSON.parse(localStorage.getItem(KEY)); }catch(e){}
+    if(!s || !s.products || !s.expenses){
+      s = {
+        tab:'gider', profit:30, split:'cost',
+        expenses:[ {name:'Kargo', amount:50, active:true}, {name:'Paketleme', amount:10, active:true} ],
+        products:[
+          {name:'Örnek Ürün 1', cost:100, active:true, sizes:{S:2,M:3,L:2,XL:1,'2XL':0,'3XL':0}},
+          {name:'Örnek Ürün 2', cost:250, active:true, sizes:{S:0,M:1,L:2,XL:1,'2XL':0,'3XL':0}}
+        ]
+      };
+    }
+    // normalize: her ürünün beden objesi olsun
+    (s.products||[]).forEach(p=>{
+      if(!p.sizes || typeof p.sizes!=='object') p.sizes={};
+      SIZES.forEach(k=>{ if(typeof p.sizes[k]!=='number') p.sizes[k]=Number(p.sizes[k])||0; });
+    });
+    return s;
+  }
+  function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
+  const qtyOf = p => SIZES.reduce((s,k)=>s+(Number(p.sizes&&p.sizes[k])||0),0);
+
+  /* ---- hesap çekirdeği (beden adetleriyle) ---- */
+  function compute(){
+    const exp = state.expenses.filter(e=>e.active).reduce((s,e)=>s+(Number(e.amount)||0),0);
+    const prods = state.products.filter(p=>p.active);
+    const profit = Number(state.profit)||0;
+    const N = prods.reduce((s,p)=>s+qtyOf(p),0);                 // toplam adet
+    const sumCW = prods.reduce((s,p)=>s+(Number(p.cost)||0)*qtyOf(p),0); // maliyet ağırlığı
+
+    const rows = prods.map(p=>{
+      const cost=Number(p.cost)||0, qty=qtyOf(p);
+      let payRow;
+      if(state.split==='cost') payRow = sumCW>0 ? exp*((cost*qty)/sumCW) : (N>0? exp*(qty/N):0);
+      else payRow = N>0 ? exp*(qty/N) : 0;
+      const perUnitGider = qty>0 ? payRow/qty : 0;
+      const maliyetBirim = cost + perUnitGider;
+      const satisBirim = maliyetBirim*(1+profit/100);
+      const karBirim = satisBirim - maliyetBirim;
+      return {name:p.name, sizes:p.sizes, cost, qty, maliyetBirim, satisBirim,
+              maliyet:maliyetBirim*qty, ciro:satisBirim*qty, kar:karBirim*qty};
+    });
+    return {
+      exp, rows, N,
+      tMaliyet: rows.reduce((s,r)=>s+r.maliyet,0),
+      tCiro: rows.reduce((s,r)=>s+r.ciro,0),
+      tKar: rows.reduce((s,r)=>s+r.kar,0),
+      get marj(){ return this.tCiro>0 ? this.tKar/this.tCiro*100 : 0; },
+      activeCount: prods.length
+    };
+  }
+
+  /* ---- sekmeler ---- */
+  const titles = {
+    gider:['Gider','Giderlerini tek tek gir, aktif/pasif yap'],
+    urunler:['Ürünler','Ürünleri gir; her bedenin adedini belirle'],
+    hesap:['Hesaplama','Kâr oranını seç, satış fiyatlarını gör']
+  };
+  function showTab(t){
+    state.tab=t; save();
+    document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===t));
+    $('#head').innerHTML = `<h1>${titles[t][0]}</h1><p>${titles[t][1]}</p>`;
+    if(t==='gider') renderGider(); else if(t==='urunler') renderUrunler(); else renderHesap();
+    closeSide();
+  }
+  document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.tab)));
+
+  /* ---- GİDER ---- */
+  function renderGider(){
+    $('#panel').innerHTML = `
+      <div class="card">
+        <div class="list-head"><span>Aktif</span><span>Gider Adı</span><span>Tutar</span><span></span></div>
+        <div class="list" id="expList"></div>
+        <button class="btn" id="addExp">＋ Gider Ekle</button>
+      </div>
+      <div class="foot-total"><span>Aktif giderler toplamı</span><b id="expTotal">₺0</b></div>`;
+    drawExp();
+    $('#addExp').addEventListener('click',()=>{ state.expenses.push({name:'',amount:0,active:true}); save(); drawExp(); focusLast('#expList','.item'); });
+  }
+  function drawExp(){
+    const list=$('#expList');
+    if(!state.expenses.length){ list.innerHTML=`<div class="empty">Henüz gider yok. “＋ Gider Ekle” ile başla.</div>`; }
+    else list.innerHTML = state.expenses.map((e,i)=>`
+      <div class="item ${e.active?'':'off'}" data-i="${i}">
+        <div class="sw"><input type="checkbox" id="ex${i}" data-act ${e.active?'checked':''}><label for="ex${i}"></label></div>
+        <input type="text" data-f="name" value="${esc(e.name)}" placeholder="Ör. Kargo, kira, komisyon...">
+        <div class="amt-wrap"><input type="number" data-f="amount" min="0" step="0.01" value="${e.amount}"><span class="suf">₺</span></div>
+        <button class="del" data-del title="Sil">✕</button>
+      </div>`).join('');
+    list.querySelectorAll('.item').forEach(row=>{
+      const i=Number(row.dataset.i);
+      row.querySelectorAll('input[data-f]').forEach(inp=>inp.addEventListener('input',()=>{
+        state.expenses[i][inp.dataset.f] = inp.dataset.f==='name'?inp.value:(parseFloat(inp.value)||0); save(); expTotal();
+      }));
+      row.querySelector('[data-act]').addEventListener('change',e=>{ state.expenses[i].active=e.target.checked; row.classList.toggle('off',!e.target.checked); save(); expTotal(); });
+      row.querySelector('[data-del]').addEventListener('click',()=>{ state.expenses.splice(i,1); save(); drawExp(); });
+    });
+    expTotal();
+  }
+  function expTotal(){ const t=$('#expTotal'); if(t) t.textContent=TL(state.expenses.filter(e=>e.active).reduce((s,e)=>s+(Number(e.amount)||0),0)); }
+
+  /* ---- ÜRÜNLER (bedenli) ---- */
+  function renderUrunler(){
+    $('#panel').innerHTML = `
+      <div class="card">
+        <div class="list" id="prodList"></div>
+        <button class="btn" id="addProd">＋ Ürün Ekle</button>
+        <div class="hint">Her ürün için S, M, L, XL, 2XL, 3XL adetlerini gir. Toplam adet, kâr/ciro hesabına yansır.</div>
+      </div>
+      <div class="foot-total"><span>Aktif ürün / toplam adet</span><b id="prodTotal">0 · 0</b></div>`;
+    drawProd();
+    $('#addProd').addEventListener('click',()=>{ const sizes={}; SIZES.forEach(k=>sizes[k]=0); state.products.push({name:'',cost:0,active:true,sizes}); save(); drawProd(); focusLast('#prodList','.pcard'); });
+  }
+  function drawProd(){
+    const list=$('#prodList');
+    if(!state.products.length){ list.innerHTML=`<div class="empty">Henüz ürün yok. “＋ Ürün Ekle” ile başla.</div>`; prodTotal(); return; }
+    list.innerHTML = state.products.map((r,i)=>`
+      <div class="pcard ${r.active?'':'off'}" data-i="${i}">
+        <div class="pcard-top">
+          <div class="sw"><input type="checkbox" id="pr${i}" data-act ${r.active?'checked':''}><label for="pr${i}"></label></div>
+          <input type="text" data-f="name" value="${esc(r.name)}" placeholder="Ürün adı">
+          <div class="amt-wrap"><input type="number" data-f="cost" min="0" step="0.01" value="${r.cost}" title="Alış fiyatı"><span class="suf">₺</span></div>
+          <button class="del" data-del title="Sil">✕</button>
+        </div>
+        <div class="sizes">
+          ${SIZES.map(sz=>`<div class="size"><span class="sl">${sz}</span><input type="number" min="0" step="1" data-size="${sz}" value="${Number(r.sizes[sz])||0}"></div>`).join('')}
+          <div class="size tot"><span class="sl">Toplam</span><b data-total>${qtyOf(r)}</b></div>
+        </div>
+      </div>`).join('');
+    list.querySelectorAll('.pcard').forEach(card=>{
+      const i=Number(card.dataset.i);
+      card.querySelector('[data-f="name"]').addEventListener('input',e=>{ state.products[i].name=e.target.value; save(); });
+      card.querySelector('[data-f="cost"]').addEventListener('input',e=>{ state.products[i].cost=parseFloat(e.target.value)||0; save(); });
+      card.querySelectorAll('[data-size]').forEach(inp=>inp.addEventListener('input',()=>{
+        state.products[i].sizes[inp.dataset.size]=Math.max(0,parseInt(inp.value)||0);
+        card.querySelector('[data-total]').textContent=qtyOf(state.products[i]);
+        save(); prodTotal();
+      }));
+      card.querySelector('[data-act]').addEventListener('change',e=>{ state.products[i].active=e.target.checked; card.classList.toggle('off',!e.target.checked); save(); prodTotal(); });
+      card.querySelector('[data-del]').addEventListener('click',()=>{ state.products.splice(i,1); save(); drawProd(); });
+    });
+    prodTotal();
+  }
+  function prodTotal(){ const t=$('#prodTotal'); if(!t) return;
+    const act=state.products.filter(p=>p.active); const units=act.reduce((s,p)=>s+qtyOf(p),0);
+    t.textContent = act.length+' · '+units+' adet'; }
+
+  /* ---- HESAPLAMA ---- */
+  function renderHesap(){
+    $('#panel').innerHTML = `
+      <div class="card profit-box">
+        <div class="profit-val" id="profitVal">%${state.profit}</div>
+        <div class="profit-sub">Kaç kâr etmek istiyorsun? (maliyetin üzerine)</div>
+        <input type="range" id="profit" min="0" max="200" step="1" value="${Number(state.profit)||0}">
+        <div class="range-ticks"><span>%0</span><span>%50</span><span>%100</span><span>%150</span><span>%200</span></div>
+        <div class="quick-pc" id="quickPc">
+          ${[0,10,20,30,50,75,100,150,200].map(v=>`<button data-pc="${v}" class="${Number(state.profit)===v?'on':''}">%${v}</button>`).join('')}
+        </div>
+        <div class="split-row"><label>Gideri ürünlere dağıt:</label>
+          <select id="split">
+            <option value="cost" ${state.split==='cost'?'selected':''}>Alış × adete göre (orantılı)</option>
+            <option value="equal" ${state.split==='equal'?'selected':''}>Adete eşit böl</option>
+          </select>
+        </div>
+      </div>
+      <div class="card">
+        <div class="table-wrap"><table>
+          <thead><tr><th>Ürün</th><th>Adet</th><th>Alış</th><th>Maliyet</th><th>Satış Fiyatı</th><th>Kâr (toplam)</th></tr></thead>
+          <tbody id="resBody"></tbody>
+          <tfoot><tr><td>TOPLAM</td><td id="fAdet">0</td><td></td><td id="fMaliyet">₺0</td><td id="fCiro">₺0</td><td class="profit pos" id="fKar">₺0</td></tr></tfoot>
+        </table></div>
+        <div class="hint">“Satış Fiyatı” birim (tek ürün) fiyatıdır. “Kâr (toplam)”, o üründen girdiğin toplam adet üzerinden hesaplanır.</div>
+      </div>
+      <div class="summary">
+        <div class="sum"><div class="s-l">Toplam Maliyet</div><div class="s-v" id="sMaliyet">₺0</div></div>
+        <div class="sum"><div class="s-l">Toplam Ciro</div><div class="s-v accent" id="sCiro">₺0</div></div>
+        <div class="sum"><div class="s-l">Toplam Net Kâr</div><div class="s-v green" id="sKar">₺0</div></div>
+        <div class="sum"><div class="s-l">Ortalama Marj</div><div class="s-v" id="sMarj">%0</div></div>
+      </div>`;
+    const slider=$('#profit');
+    slider.addEventListener('input',()=>{ state.profit=Number(slider.value)||0; save();
+      $('#profitVal').textContent='%'+state.profit;
+      document.querySelectorAll('#quickPc button').forEach(b=>b.classList.toggle('on',Number(b.dataset.pc)===state.profit));
+      calcResults(); });
+    document.querySelectorAll('#quickPc button').forEach(b=>b.addEventListener('click',()=>{
+      state.profit=Number(b.dataset.pc); slider.value=state.profit; save();
+      $('#profitVal').textContent='%'+state.profit;
+      document.querySelectorAll('#quickPc button').forEach(x=>x.classList.toggle('on',x===b));
+      calcResults(); }));
+    $('#split').addEventListener('change',()=>{ state.split=$('#split').value; save(); calcResults(); });
+    calcResults();
+  }
+  function sizeMini(sizes){ const parts=SIZES.filter(k=>Number(sizes[k])>0).map(k=>`${k}:${sizes[k]}`); return parts.length?parts.join('  '):'—'; }
+  function calcResults(){
+    const c=compute();
+    const body=$('#resBody');
+    if(!c.activeCount){ body.innerHTML=`<tr><td colspan="6" class="empty">Aktif ürün yok. “Ürünler” sekmesinden ürün ekleyip aktif et.</td></tr>`; }
+    else body.innerHTML = c.rows.map(r=>`
+      <tr>
+        <td>${esc(r.name||'—')}<div class="szmini">${sizeMini(r.sizes)}</div></td>
+        <td>${r.qty}</td>
+        <td>${TL(r.cost)}</td>
+        <td>${TL(r.maliyetBirim)}</td>
+        <td class="sale">${TL(r.satisBirim)}</td>
+        <td class="profit ${r.kar>=0?'pos':'neg'}">${TL(r.kar)}</td>
+      </tr>`).join('');
+    $('#fAdet').textContent=c.N;
+    $('#fMaliyet').textContent=TL(c.tMaliyet);
+    $('#fCiro').textContent=TL(c.tCiro);
+    const fk=$('#fKar'); fk.textContent=TL(c.tKar); fk.className='profit '+(c.tKar>=0?'pos':'neg');
+    $('#sMaliyet').textContent=TL(c.tMaliyet);
+    $('#sCiro').textContent=TL(c.tCiro);
+    $('#sKar').textContent=TL(c.tKar); $('#sKar').style.color=c.tKar>=0?'var(--green)':'var(--red)';
+    $('#sMarj').textContent=PC(c.marj);
+  }
+
+  function focusLast(listSel,itemSel){ const el=document.querySelector(listSel+' '+itemSel+':last-child input[type=text]'); if(el) el.focus(); }
+
+  const side=$('#side'), scrim=$('#scrim');
+  function openSide(){ side.classList.add('open'); scrim.style.display='block'; }
+  function closeSide(){ side.classList.remove('open'); scrim.style.display='none'; }
+  $('#menuBtn').addEventListener('click',openSide);
+  scrim.addEventListener('click',closeSide);
+
+  showTab(state.tab||'gider');
+})();
+</script>
+</body>
+</html>
